@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.manufacture.mapper.MacMachineMapper">
+    
+    <resultMap type="MacMachine" id="MacMachineResult">
+        <result property="id"    column="id"    />
+        <result property="maccode"    column="macCode"    />
+        <result property="mactype"    column="macType"    />
+        <result property="macstatus"    column="macStatus"    />
+        <result property="macspeed"    column="macSpeed"    />
+        <result property="macefficiency"    column="macEfficiency"    />
+        <result property="pdtcode"    column="pdtCode"    />
+        <result property="shaftcode"    column="shaftCode"    />
+        <result property="ordercode"    column="orderCode"    />
+        <result property="updatetime"    column="updateTime"    />
+        <result property="maccolumn"    column="macColumn"    />
+        <result property="macrow"    column="macRow"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectMacMachineVo">
+        select id, macCode, macType, macStatus, macSpeed, macEfficiency, pdtCode, shaftCode, orderCode, updateTime, macColumn, macRow, remark from mac_machine
+    </sql>
+
+    <select id="selectMacMachineList" parameterType="MacMachine" resultMap="MacMachineResult">
+        <include refid="selectMacMachineVo"/>
+        <where>  
+            <if test="maccode != null  and maccode != ''"> and macCode = #{maccode}</if>
+            <if test="mactype != null  and mactype != ''"> and macType = #{mactype}</if>
+            <if test="macstatus != null "> and macStatus = #{macstatus}</if>
+            <if test="params.beginMacspeed != null and params.beginMacspeed != '' and params.endMacspeed != null and params.endMacspeed != ''"> and macSpeed between #{params.beginMacspeed} and #{params.endMacspeed}</if>
+            <if test="params.beginMacefficiency != null and params.beginMacefficiency != '' and params.endMacefficiency != null and params.endMacefficiency != ''"> and macEfficiency between #{params.beginMacefficiency} and #{params.endMacefficiency}</if>
+            <if test="pdtcode != null  and pdtcode != ''"> and pdtCode = #{pdtcode}</if>
+            <if test="shaftcode != null  and shaftcode != ''"> and shaftCode = #{shaftcode}</if>
+            <if test="params.beginUpdatetime != null and params.beginUpdatetime != '' and params.endUpdatetime != null and params.endUpdatetime != ''"> and updateTime between #{params.beginUpdatetime} and #{params.endUpdatetime}</if>
+        </where>
+        order by macColumn,macRow
+    </select>
+    
+    <select id="selectMacMachineById" parameterType="Long" resultMap="MacMachineResult">
+        <include refid="selectMacMachineVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertMacMachine" parameterType="MacMachine" useGeneratedKeys="true" keyProperty="id">
+        insert into mac_machine
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="maccode != null and maccode != ''">macCode,</if>
+            <if test="mactype != null">macType,</if>
+            <if test="macstatus != null">macStatus,</if>
+            <if test="macspeed != null">macSpeed,</if>
+            <if test="macefficiency != null">macEfficiency,</if>
+            <if test="pdtcode != null">pdtCode,</if>
+            <if test="shaftcode != null">shaftCode,</if>
+            <if test="ordercode != null">orderCode,</if>
+            <if test="updatetime != null">updateTime,</if>
+            <if test="maccolumn != null">macColumn,</if>
+            <if test="macrow != null">macRow,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="maccode != null and maccode != ''">#{maccode},</if>
+            <if test="mactype != null">#{mactype},</if>
+            <if test="macstatus != null">#{macstatus},</if>
+            <if test="macspeed != null">#{macspeed},</if>
+            <if test="macefficiency != null">#{macefficiency},</if>
+            <if test="pdtcode != null">#{pdtcode},</if>
+            <if test="shaftcode != null">#{shaftcode},</if>
+            <if test="ordercode != null">#{ordercode},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+            <if test="maccolumn != null">#{maccolumn},</if>
+            <if test="macrow != null">#{macrow},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMacMachine" parameterType="MacMachine">
+        update mac_machine
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="maccode != null and maccode != ''">macCode = #{maccode},</if>
+            <if test="mactype != null">macType = #{mactype},</if>
+            <if test="macstatus != null">macStatus = #{macstatus},</if>
+            <if test="macspeed != null">macSpeed = #{macspeed},</if>
+            <if test="macefficiency != null">macEfficiency = #{macefficiency},</if>
+            <if test="pdtcode != null">pdtCode = #{pdtcode},</if>
+            <if test="shaftcode != null">shaftCode = #{shaftcode},</if>
+            <if test="ordercode != null">orderCode = #{ordercode},</if>
+            <if test="updatetime != null">updateTime = #{updatetime},</if>
+            <if test="maccolumn != null">macColumn = #{maccolumn},</if>
+            <if test="macrow != null">macRow = #{macrow},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMacMachineById" parameterType="Long">
+        delete from mac_machine where id = #{id}
+    </delete>
+
+    <delete id="deleteMacMachineByIds" parameterType="String">
+        delete from mac_machine where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.manufacture.mapper.MftShiftMapper">
+    
+    <resultMap type="MftShift" id="MftShiftResult">
+        <result property="id"    column="id"    />
+        <result property="maccode"    column="macCode"    />
+        <result property="shifttype"    column="shiftType"    />
+        <result property="shiftstarttime"    column="shiftStartTime"    />
+        <result property="shiftendtime"    column="shiftEndTime"    />
+        <result property="pdtcodes"    column="pdtCodes"    />
+        <result property="shaftcodes"    column="shaftCodes"    />
+        <result property="macspeed"    column="macSpeed"    />
+        <result property="macefficiency"    column="macEfficiency"    />
+        <result property="runtime"    column="runTime"    />
+        <result property="stoptime"    column="stopTime"    />
+        <result property="warpstoptime"    column="warpStopTime"    />
+        <result property="weftstoptime"    column="weftStopTIme"    />
+        <result property="offlinetime"    column="offLineTime"    />
+        <result property="otherstoptime"    column="otherStopTime"    />
+        <result property="warpstopnum"    column="warpStopNum"    />
+        <result property="weftstopnum"    column="weftStopNum"    />
+        <result property="otherstopnum"    column="otherStopNum"    />
+        <result property="picknum"    column="pickNum"    />
+        <result property="uploadnum"    column="uploadNum"    />
+        <result property="statuschangenum"    column="statusChangeNum"    />
+        <result property="shiftlength"    column="shiftLength"    />
+        <result property="shiftdate"    column="shiftDate"    />
+        <result property="shiftnow"    column="shiftNow"    />
+        <result property="updatetime"    column="updateTime"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectMftShiftVo">
+        select id, macCode, shiftType, shiftStartTime, shiftEndTime, pdtCodes, shaftCodes, macSpeed, macEfficiency, runTime, stopTime, warpStopTime, weftStopTIme, offLineTime, otherStopTime, warpStopNum, weftStopNum, otherStopNum, pickNum, uploadNum, statusChangeNum, shiftLength, shiftDate, shiftNow, updateTime, remark from mft_shift
+    </sql>
+
+    <select id="selectMftShiftList" parameterType="MftShift" resultMap="MftShiftResult">
+        <include refid="selectMftShiftVo"/>
+        <where>  
+            <if test="maccode != null  and maccode != ''"> and macCode = #{maccode}</if>
+            <if test="shifttype != null  and shifttype != ''"> and shiftType = #{shifttype}</if>
+            <if test="shiftstarttime != null "> and shiftStartTime = #{shiftstarttime}</if>
+            <if test="shiftendtime != null "> and shiftEndTime = #{shiftendtime}</if>
+            <if test="pdtcodes != null  and pdtcodes != ''"> and pdtCodes = #{pdtcodes}</if>
+            <if test="shaftcodes != null  and shaftcodes != ''"> and shaftCodes = #{shaftcodes}</if>
+            <if test="params.beginMacspeed != null and params.beginMacspeed != '' and params.endMacspeed != null and params.endMacspeed != ''"> and macSpeed between #{params.beginMacspeed} and #{params.endMacspeed}</if>
+            <if test="macefficiency != null "> and macEfficiency = #{macefficiency}</if>
+            <if test="runtime != null "> and runTime = #{runtime}</if>
+            <if test="stoptime != null "> and stopTime = #{stoptime}</if>
+            <if test="warpstoptime != null "> and warpStopTime = #{warpstoptime}</if>
+            <if test="weftstoptime != null "> and weftStopTIme = #{weftstoptime}</if>
+            <if test="offlinetime != null "> and offLineTime = #{offlinetime}</if>
+            <if test="otherstoptime != null "> and otherStopTime = #{otherstoptime}</if>
+            <if test="warpstopnum != null "> and warpStopNum = #{warpstopnum}</if>
+            <if test="weftstopnum != null "> and weftStopNum = #{weftstopnum}</if>
+            <if test="otherstopnum != null "> and otherStopNum = #{otherstopnum}</if>
+            <if test="picknum != null "> and pickNum = #{picknum}</if>
+            <if test="shiftlength != null "> and shiftLength = #{shiftlength}</if>
+            <if test="shiftdate != null "> and shiftDate = #{shiftdate}</if>
+            <if test="shiftnow != null "> and shiftNow = #{shiftnow}</if>
+            <if test="updatetime != null "> and updateTime = #{updatetime}</if>
+        </where>
+    </select>
+    
+    <select id="selectMftShiftById" parameterType="Long" resultMap="MftShiftResult">
+        <include refid="selectMftShiftVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertMftShift" parameterType="MftShift" useGeneratedKeys="true" keyProperty="id">
+        insert into mft_shift
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="maccode != null">macCode,</if>
+            <if test="shifttype != null">shiftType,</if>
+            <if test="shiftstarttime != null">shiftStartTime,</if>
+            <if test="shiftendtime != null">shiftEndTime,</if>
+            <if test="pdtcodes != null">pdtCodes,</if>
+            <if test="shaftcodes != null">shaftCodes,</if>
+            <if test="macspeed != null">macSpeed,</if>
+            <if test="macefficiency != null">macEfficiency,</if>
+            <if test="runtime != null">runTime,</if>
+            <if test="stoptime != null">stopTime,</if>
+            <if test="warpstoptime != null">warpStopTime,</if>
+            <if test="weftstoptime != null">weftStopTIme,</if>
+            <if test="offlinetime != null">offLineTime,</if>
+            <if test="otherstoptime != null">otherStopTime,</if>
+            <if test="warpstopnum != null">warpStopNum,</if>
+            <if test="weftstopnum != null">weftStopNum,</if>
+            <if test="otherstopnum != null">otherStopNum,</if>
+            <if test="picknum != null">pickNum,</if>
+            <if test="uploadnum != null">uploadNum,</if>
+            <if test="statuschangenum != null">statusChangeNum,</if>
+            <if test="shiftlength != null">shiftLength,</if>
+            <if test="shiftdate != null">shiftDate,</if>
+            <if test="shiftnow != null">shiftNow,</if>
+            <if test="updatetime != null">updateTime,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="maccode != null">#{maccode},</if>
+            <if test="shifttype != null">#{shifttype},</if>
+            <if test="shiftstarttime != null">#{shiftstarttime},</if>
+            <if test="shiftendtime != null">#{shiftendtime},</if>
+            <if test="pdtcodes != null">#{pdtcodes},</if>
+            <if test="shaftcodes != null">#{shaftcodes},</if>
+            <if test="macspeed != null">#{macspeed},</if>
+            <if test="macefficiency != null">#{macefficiency},</if>
+            <if test="runtime != null">#{runtime},</if>
+            <if test="stoptime != null">#{stoptime},</if>
+            <if test="warpstoptime != null">#{warpstoptime},</if>
+            <if test="weftstoptime != null">#{weftstoptime},</if>
+            <if test="offlinetime != null">#{offlinetime},</if>
+            <if test="otherstoptime != null">#{otherstoptime},</if>
+            <if test="warpstopnum != null">#{warpstopnum},</if>
+            <if test="weftstopnum != null">#{weftstopnum},</if>
+            <if test="otherstopnum != null">#{otherstopnum},</if>
+            <if test="picknum != null">#{picknum},</if>
+            <if test="uploadnum != null">#{uploadnum},</if>
+            <if test="statuschangenum != null">#{statuschangenum},</if>
+            <if test="shiftlength != null">#{shiftlength},</if>
+            <if test="shiftdate != null">#{shiftdate},</if>
+            <if test="shiftnow != null">#{shiftnow},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMftShift" parameterType="MftShift">
+        update mft_shift
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="maccode != null">macCode = #{maccode},</if>
+            <if test="shifttype != null">shiftType = #{shifttype},</if>
+            <if test="shiftstarttime != null">shiftStartTime = #{shiftstarttime},</if>
+            <if test="shiftendtime != null">shiftEndTime = #{shiftendtime},</if>
+            <if test="pdtcodes != null">pdtCodes = #{pdtcodes},</if>
+            <if test="shaftcodes != null">shaftCodes = #{shaftcodes},</if>
+            <if test="macspeed != null">macSpeed = #{macspeed},</if>
+            <if test="macefficiency != null">macEfficiency = #{macefficiency},</if>
+            <if test="runtime != null">runTime = #{runtime},</if>
+            <if test="stoptime != null">stopTime = #{stoptime},</if>
+            <if test="warpstoptime != null">warpStopTime = #{warpstoptime},</if>
+            <if test="weftstoptime != null">weftStopTIme = #{weftstoptime},</if>
+            <if test="offlinetime != null">offLineTime = #{offlinetime},</if>
+            <if test="otherstoptime != null">otherStopTime = #{otherstoptime},</if>
+            <if test="warpstopnum != null">warpStopNum = #{warpstopnum},</if>
+            <if test="weftstopnum != null">weftStopNum = #{weftstopnum},</if>
+            <if test="otherstopnum != null">otherStopNum = #{otherstopnum},</if>
+            <if test="picknum != null">pickNum = #{picknum},</if>
+            <if test="uploadnum != null">uploadNum = #{uploadnum},</if>
+            <if test="statuschangenum != null">statusChangeNum = #{statuschangenum},</if>
+            <if test="shiftlength != null">shiftLength = #{shiftlength},</if>
+            <if test="shiftdate != null">shiftDate = #{shiftdate},</if>
+            <if test="shiftnow != null">shiftNow = #{shiftnow},</if>
+            <if test="updatetime != null">updateTime = #{updatetime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMftShiftById" parameterType="Long">
+        delete from mft_shift where id = #{id}
+    </delete>
+
+    <delete id="deleteMftShiftByIds" parameterType="String">
+        delete from mft_shift where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

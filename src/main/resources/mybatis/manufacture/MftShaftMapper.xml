@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.manufacture.mapper.MftShaftMapper">
+    
+    <resultMap type="MftShaft" id="MftShaftResult">
+        <result property="id"    column="id"    />
+        <result property="shaftcode"    column="shaftCode"    />
+        <result property="shaftno"    column="shaftNo"    />
+        <result property="shaftlength"    column="shaftLength"    />
+        <result property="pdtcode"    column="pdtCode"    />
+        <result property="pdtweftshrinkage"    column="pdtWeftShrinkage"    />
+        <result property="ordercode"    column="orderCode"    />
+        <result property="shaftstatus"    column="shaftStatus"    />
+        <result property="shaftremainlength"    column="shaftRemainLength"    />
+        <result property="clothlength"    column="clothLength"    />
+        <result property="shaftworker"    column="shaftWorker"    />
+        <result property="warpbacth"    column="warpBacth"    />
+        <result property="weftbacth"    column="weftBacth"    />
+        <result property="createtime"    column="createTime"    />
+        <result property="updatetime"    column="updateTime"    />
+        <result property="planstart"    column="planStart"    />
+        <result property="planend"    column="planEnd"    />
+        <result property="actstart"    column="actStart"    />
+        <result property="actend"    column="actEnd"    />
+        <result property="planmaccode"    column="planMacCode"    />
+        <result property="actmaccode"    column="actMacCode"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectMftShaftVo">
+        select id, shaftCode, shaftNo, shaftLength, pdtCode, pdtWeftShrinkage, orderCode, shaftStatus, shaftRemainLength, clothLength, shaftWorker, warpBacth, weftBacth, createTime, updateTime, planStart, planEnd, actStart, actEnd, planMacCode, actMacCode, remark from mft_shaft
+    </sql>
+
+    <select id="selectMftShaftList" parameterType="MftShaft" resultMap="MftShaftResult">
+        <include refid="selectMftShaftVo"/>
+        <where>  
+            <if test="shaftcode != null  and shaftcode != ''"> and shaftCode = #{shaftcode}</if>
+            <if test="shaftno != null  and shaftno != ''"> and shaftNo = #{shaftno}</if>
+            <if test="shaftlength != null "> and shaftLength = #{shaftlength}</if>
+            <if test="pdtcode != null  and pdtcode != ''"> and pdtCode = #{pdtcode}</if>
+            <if test="ordercode != null  and ordercode != ''"> and orderCode = #{ordercode}</if>
+            <if test="shaftstatus != null  and shaftstatus != ''"> and shaftStatus = #{shaftstatus}</if>
+            <if test="shaftremainlength != null "> and shaftRemainLength = #{shaftremainlength}</if>
+            <if test="clothlength != null "> and clothLength = #{clothlength}</if>
+            <if test="shaftworker != null  and shaftworker != ''"> and shaftWorker = #{shaftworker}</if>
+            <if test="warpbacth != null  and warpbacth != ''"> and warpBacth = #{warpbacth}</if>
+            <if test="weftbacth != null  and weftbacth != ''"> and weftBacth = #{weftbacth}</if>
+            <if test="createtime != null "> and createTime = #{createtime}</if>
+            <if test="planstart != null "> and planStart = #{planstart}</if>
+            <if test="planend != null "> and planEnd = #{planend}</if>
+            <if test="actstart != null "> and actStart = #{actstart}</if>
+            <if test="actend != null "> and actEnd = #{actend}</if>
+            <if test="actmaccode != null  and actmaccode != ''"> and actMacCode = #{actmaccode}</if>
+        </where>
+    </select>
+    
+    <select id="selectMftShaftById" parameterType="Long" resultMap="MftShaftResult">
+        <include refid="selectMftShaftVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertMftShaft" parameterType="MftShaft" useGeneratedKeys="true" keyProperty="id">
+        insert into mft_shaft
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="shaftcode != null and shaftcode != ''">shaftCode,</if>
+            <if test="shaftno != null">shaftNo,</if>
+            <if test="shaftlength != null">shaftLength,</if>
+            <if test="pdtcode != null and pdtcode != ''">pdtCode,</if>
+            <if test="pdtweftshrinkage != null">pdtWeftShrinkage,</if>
+            <if test="ordercode != null">orderCode,</if>
+            <if test="shaftstatus != null">shaftStatus,</if>
+            <if test="shaftremainlength != null">shaftRemainLength,</if>
+            <if test="clothlength != null">clothLength,</if>
+            <if test="shaftworker != null">shaftWorker,</if>
+            <if test="warpbacth != null">warpBacth,</if>
+            <if test="weftbacth != null">weftBacth,</if>
+            <if test="createtime != null">createTime,</if>
+            <if test="updatetime != null">updateTime,</if>
+            <if test="planstart != null">planStart,</if>
+            <if test="planend != null">planEnd,</if>
+            <if test="actstart != null">actStart,</if>
+            <if test="actend != null">actEnd,</if>
+            <if test="planmaccode != null">planMacCode,</if>
+            <if test="actmaccode != null">actMacCode,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="shaftcode != null and shaftcode != ''">#{shaftcode},</if>
+            <if test="shaftno != null">#{shaftno},</if>
+            <if test="shaftlength != null">#{shaftlength},</if>
+            <if test="pdtcode != null and pdtcode != ''">#{pdtcode},</if>
+            <if test="pdtweftshrinkage != null">#{pdtweftshrinkage},</if>
+            <if test="ordercode != null">#{ordercode},</if>
+            <if test="shaftstatus != null">#{shaftstatus},</if>
+            <if test="shaftremainlength != null">#{shaftremainlength},</if>
+            <if test="clothlength != null">#{clothlength},</if>
+            <if test="shaftworker != null">#{shaftworker},</if>
+            <if test="warpbacth != null">#{warpbacth},</if>
+            <if test="weftbacth != null">#{weftbacth},</if>
+            <if test="createtime != null">#{createtime},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+            <if test="planstart != null">#{planstart},</if>
+            <if test="planend != null">#{planend},</if>
+            <if test="actstart != null">#{actstart},</if>
+            <if test="actend != null">#{actend},</if>
+            <if test="planmaccode != null">#{planmaccode},</if>
+            <if test="actmaccode != null">#{actmaccode},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateMftShaft" parameterType="MftShaft">
+        update mft_shaft
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="shaftcode != null and shaftcode != ''">shaftCode = #{shaftcode},</if>
+            <if test="shaftno != null">shaftNo = #{shaftno},</if>
+            <if test="shaftlength != null">shaftLength = #{shaftlength},</if>
+            <if test="pdtcode != null and pdtcode != ''">pdtCode = #{pdtcode},</if>
+            <if test="pdtweftshrinkage != null">pdtWeftShrinkage = #{pdtweftshrinkage},</if>
+            <if test="ordercode != null">orderCode = #{ordercode},</if>
+            <if test="shaftstatus != null">shaftStatus = #{shaftstatus},</if>
+            <if test="shaftremainlength != null">shaftRemainLength = #{shaftremainlength},</if>
+            <if test="clothlength != null">clothLength = #{clothlength},</if>
+            <if test="shaftworker != null">shaftWorker = #{shaftworker},</if>
+            <if test="warpbacth != null">warpBacth = #{warpbacth},</if>
+            <if test="weftbacth != null">weftBacth = #{weftbacth},</if>
+            <if test="createtime != null">createTime = #{createtime},</if>
+            <if test="updatetime != null">updateTime = #{updatetime},</if>
+            <if test="planstart != null">planStart = #{planstart},</if>
+            <if test="planend != null">planEnd = #{planend},</if>
+            <if test="actstart != null">actStart = #{actstart},</if>
+            <if test="actend != null">actEnd = #{actend},</if>
+            <if test="planmaccode != null">planMacCode = #{planmaccode},</if>
+            <if test="actmaccode != null">actMacCode = #{actmaccode},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteMftShaftById" parameterType="Long">
+        delete from mft_shaft where id = #{id}
+    </delete>
+
+    <delete id="deleteMftShaftByIds" parameterType="String">
+        delete from mft_shaft where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
