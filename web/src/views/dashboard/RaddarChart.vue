@@ -23,6 +23,10 @@ export default {
     height: {
       type: String,
       default: '300px'
+    },
+    chartData:{
+      type:Array,
+      required:true
     }
   },
   data() {
@@ -30,6 +34,15 @@ export default {
       chart: null
     }
   },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        this.setOptions(val)
+      }
+    }
+  },
+
   mounted() {
     this.$nextTick(() => {
       this.initChart()
@@ -45,10 +58,13 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
+      this.setOptions(this.chartData)
+    },
+    setOptions(chartData){
       this.chart.setOption({
         tooltip: {
-          trigger: 'axis',
+          show:true,
+          trigger: 'item',
           axisPointer: { // 坐标轴指示器，坐标轴触发有效
             type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
           }
@@ -68,18 +84,18 @@ export default {
             }
           },
           indicator: [
-            { name: 'Sales', max: 10000 },
-            { name: 'Administration', max: 20000 },
-            { name: 'Information Techology', max: 20000 },
-            { name: 'Customer Support', max: 20000 },
-            { name: 'Development', max: 20000 },
-            { name: 'Marketing', max: 20000 }
+            { name: '平均车速', max: 1000 },
+            { name: '平均效率', max: 100 },
+            { name: '班次产量', max: 100000 },
+            { name: '运转时长', max: 10000 },
+            { name: '停台时长', max: 10000 },
+            { name: '停台次数', max: 100 }
           ]
         },
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['Allocated Budget', 'Expected Spending', 'Actual Spending']
+          data: ['早班', '中班', '晚班']
         },
         series: [{
           type: 'radar',
@@ -93,20 +109,7 @@ export default {
               opacity: 1
             }
           },
-          data: [
-            {
-              value: [5000, 7000, 12000, 11000, 15000, 14000],
-              name: 'Allocated Budget'
-            },
-            {
-              value: [4000, 9000, 15000, 15000, 13000, 11000],
-              name: 'Expected Spending'
-            },
-            {
-              value: [5500, 11000, 12000, 15000, 12000, 12000],
-              name: 'Actual Spending'
-            }
-          ],
+          data: chartData,
           animationDuration: animationDuration
         }]
       })

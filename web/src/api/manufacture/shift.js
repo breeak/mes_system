@@ -9,6 +9,15 @@ export function listShift(query) {
   })
 }
 
+// 查询班次最近几天的数据统计
+export function listShiftRecent(days) {
+  return request({
+    url: '/manufacture/shift/recent/'+days,
+    method: 'get',
+    params: days
+  })
+}
+
 // 查询班次效率详细
 export function getShift(id) {
   return request({

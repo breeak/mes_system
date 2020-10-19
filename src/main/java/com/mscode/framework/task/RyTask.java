@@ -56,22 +56,42 @@ public class RyTask
 
     public void generateShift(String shiftType)
     {
-        // 把旧的当前班次给闭合
+        //倒数第三班去掉
         MftShift mftShift1 = new MftShift();
-        mftShift1.setShiftnow(1L);
+        mftShift1.setShiftnow(-2L);
         List<MftShift> mftShifts = mftShiftService.selectMftShiftList(mftShift1);
         for (MftShift mftShift : mftShifts) {
             mftShift.setShiftnow(0L); //设为不是当前班次了
+            mftShift.setUpdatetime(new Date());
+            mftShiftService.updateMftShift(mftShift);//更新数据
+        }
+        //倒数第二班设为倒数第三班
+        mftShift1 = new MftShift();
+        mftShift1.setShiftnow(-1L);
+        mftShifts = mftShiftService.selectMftShiftList(mftShift1);
+        for (MftShift mftShift : mftShifts) {
+            mftShift.setShiftnow(-2L); //设为不是当前班次了
+            mftShift.setUpdatetime(new Date());
+            mftShiftService.updateMftShift(mftShift);//更新数据
+        }
+
+
+        // 把旧的当前班次给设为倒数第一班
+        mftShift1 = new MftShift();
+        mftShift1.setShiftnow(1L);
+        mftShifts = mftShiftService.selectMftShiftList(mftShift1);
+        for (MftShift mftShift : mftShifts) {
+            mftShift.setShiftnow(-1L); //设为不是当前班次了
             mftShift.setShiftendtime(new Date()); // 结束设为当前时间
             MacMachine macMachine = new MacMachine();
             macMachine.setMaccode(mftShift.getMaccode());
-            List<MacMachine> macMachines = macMachineService.selectMacMachineList(macMachine);
-            Long duringSecond = (new Date().getTime()-mftShift.getUpdatetime().getTime())/1000;        //TODO 更新时间只有上传数据才更新
+            List<MacMachine> macMachines = macMachineService.selectMacMachineList(macMachine); // 查找班次对应的机台 应该只有1台 当前状态下
+            Long duringSecond = (new Date().getTime()-mftShift.getUpdatetime().getTime())/1000; // 这里是算的 班次到点了 还有数据没有传完 原因=》       //TODO 更新时间只有上传数据才更新 结束状态改变才更新
             if (macMachines.size()==1){
                 Long macstatus = macMachines.get(0).getMacstatus();
                 if (macstatus==30){//运行
                     mftShift.setRuntime(mftShift.getRuntime()+duringSecond);
-                    //TODO 存储过程中要调整runTime，pickNum的计算 要与开始时间比较 如果 是切换班次的时间要分开 只需加上
+                    // 存储过程中要调整runTime，pickNum的计算 要与开始时间比较 如果 是切换班次的时间要分开 只需加上
                     // 下一次更新 picknum 要拆分 runTime 只算一半
                 }else if(macstatus==15){//经停
                     mftShift.setStoptime(mftShift.getStoptime()+duringSecond);
@@ -99,6 +119,8 @@ public class RyTask
         for (MacMachine macMachine : macMachines) {
             MftShift mftShift = new MftShift();
             mftShift.setMaccode(macMachine.getMaccode());
+            mftShift.setMiddleno(macMachine.getMiddleno());
+            mftShift.setStationno(macMachine.getStationno());
             mftShift.setShifttype(shiftType);
             mftShift.setShiftstarttime(new Date());
             mftShift.setPdtcodes(macMachine.getPdtcode());

@@ -4,30 +4,13 @@
       <el-form-item label="织轴卡号" prop="shaftcode">
         <el-input
           v-model="queryParams.shaftcode"
-          placeholder="请输入织轴卡号(开卡用唯一)"
+          placeholder="请输入织轴卡号"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <!--<el-form-item label="织轴号" prop="shaftno">
-        <el-input
-          v-model="queryParams.shaftno"
-          placeholder="请输入织轴号"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="织轴长度" prop="shaftlength">
-        <el-input
-          v-model="queryParams.shaftlength"
-          placeholder="请输入织轴长度"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>-->
+
       <el-form-item label="品种编号" prop="pdtcode">
         <el-input
           v-model="queryParams.pdtcode"
@@ -56,24 +39,7 @@
           />
         </el-select>
       </el-form-item>
-      <!--<el-form-item label="余轴长度" prop="shaftremainlength">
-        <el-input
-          v-model="queryParams.shaftremainlength"
-          placeholder="请输入余轴长度"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="已织长度" prop="clothlength">
-        <el-input
-          v-model="queryParams.clothlength"
-          placeholder="请输入已织长度"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>-->
+
       <el-form-item label="操作员" prop="shaftworker">
         <el-input
           v-model="queryParams.shaftworker"
@@ -101,46 +67,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <!--<el-form-item label="开卡时间" prop="createtime">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.createtime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择开卡时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="计划上机时间" prop="planstart">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.planstart"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择计划上机时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="计划下机时间" prop="planend">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.planend"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择计划下机时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="实际上机时间" prop="actstart">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.actstart"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择实际上机时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="实际下机时间" prop="actend">
-        <el-date-picker clearable size="small" style="width: 200px"
-          v-model="queryParams.actend"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="选择实际下机时间">
-        </el-date-picker>
-      </el-form-item>-->
       <el-form-item label="上机编号" prop="actmaccode">
         <el-input
           v-model="queryParams.actmaccode"
@@ -149,6 +75,15 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="上机时间" >
+        <el-date-picker v-model="dateActStartRange" size="small" type="datetimerange" :picker-options="pickerOptions" style="width: 360px"   range-separator="-" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker>
+      </el-form-item>
+      <el-form-item label="预了时间" >
+        <el-date-picker v-model="datePlanEndRange" size="small" type="datetimerange" :picker-options="pickerOptions" style="width: 360px"   range-separator="-" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker>
+      </el-form-item>
+      <el-form-item label="开卡时间" >
+        <el-date-picker v-model="dateRange" size="small" type="datetimerange" :picker-options="pickerOptions" style="width: 360px"   range-separator="-" start-placeholder="开始时间" end-placeholder="结束时间"></el-date-picker>
       </el-form-item>
       <el-form-item>
         <el-button type="cyan" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -184,7 +119,7 @@
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['manufacture:shaft:remove']"
-        >删除织轴</el-button>
+        >删除织轴</el-button> <!--// TODO 判断能否删除-->
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -208,52 +143,51 @@
 	  <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="shaftList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="shaftList" @selection-change="handleSelectionChange" @sort-change='sortChange'>
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="织轴卡号" align="center" prop="shaftcode" />
-      <el-table-column label="织轴号" align="center" prop="shaftno" />
-      <el-table-column label="织轴长度" align="center" prop="shaftlength" />
+      <el-table-column sortable='custom' width="100" label="织轴卡号" align="center" prop="shaftcode" />
+      <el-table-column sortable='custom' width="100" label="织轴长度" align="center" prop="shaftlength" />
       <el-table-column label="品种编号" align="center" prop="pdtcode" />
-      <el-table-column label="品种纬密" align="center" prop="pdtweftshrinkage" />
+      <el-table-column label="品种纬密" align="center" prop="pdtweftdensity" />
       <el-table-column label="订单编号" align="center" prop="ordercode" />
       <el-table-column label="织轴状态" align="center" prop="shaftstatus" :formatter="shaftstatusFormat" />
-      <el-table-column label="余轴长度" align="center" prop="shaftremainlength" />
-      <el-table-column label="已织长度" align="center" prop="clothlength" />
+      <el-table-column sortable='custom' width="100" label="余轴长度" align="center" prop="shaftremainlength" />
+      <el-table-column sortable='custom' width="100" label="已织长度" align="center" prop="clothlength" />
       <el-table-column label="操作员" align="center" prop="shaftworker" />
       <el-table-column label="经纱批次" align="center" prop="warpbacth" />
       <el-table-column label="纬纱批次" align="center" prop="weftbacth" />
-      <el-table-column label="开卡时间" align="center" prop="createtime" width="180">
+      <el-table-column sortable='custom' label="开卡时间" align="center" prop="createtime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createtime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="更新时间" align="center" prop="updatetime" width="180">
+      <el-table-column sortable='custom' label="更新时间" align="center" prop="updatetime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.updatetime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="计划上机时间" align="center" prop="planstart" width="180">
+      <el-table-column sortable='custom' label="计划上机时间" align="center" prop="planstart" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.planstart) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="计划下机时间" align="center" prop="planend" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.planend) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="实际上机时间" align="center" prop="actstart" width="180">
+      <el-table-column sortable='custom' label="实际上机时间" align="center" prop="actstart" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.actstart) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="实际下机时间" align="center" prop="actend" width="180">
+      <el-table-column sortable='custom' label="预计下机时间" align="center" prop="planend" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.planend) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column sortable='custom'label="实际下机时间" align="center" prop="actend" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.actend) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="计划上机机台编号" align="center" prop="planmaccode" />
-      <el-table-column label="实际上机机台编号" align="center" prop="actmaccode" />
+      <el-table-column sortable='custom' width="120" label="计划上机机台编号" align="center" prop="planmaccode" />
+      <el-table-column sortable='custom' width="120" label="实际上机机台编号" align="center" prop="actmaccode" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -264,13 +198,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manufacture:shaft:edit']"
           >修改</el-button>
-          <el-button
+          <!--<el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['manufacture:shaft:remove']"
-          >删除</el-button>
+          >删除</el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -285,7 +219,10 @@
 
     <!-- 添加或修改织轴列表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="120px">
+        <el-form-item v-show="false" label="织轴卡号" prop="shaftcode">
+          <el-input v-model="form.shaftstatus" value="未上轴" />
+        </el-form-item>
         <el-form-item label="织轴卡号" prop="shaftcode">
           <el-input v-model="form.shaftcode" placeholder="请输入织轴卡号(开卡用唯一)" />
         </el-form-item>
@@ -295,8 +232,8 @@
         <el-form-item label="品种编号" prop="pdtcode">
           <el-input v-model="form.pdtcode" placeholder="请输入品种编号" />
         </el-form-item>
-        <el-form-item label="品种纬密" prop="pdtweftshrinkage">
-          <el-input v-model="form.pdtweftshrinkage" placeholder="请输入品种纬密" />
+        <el-form-item label="纬密根/10cm" prop="pdtweftdensity">
+          <el-input v-model="form.pdtweftdensity" placeholder="请输入品种纬密" />
         </el-form-item>
         <el-form-item label="订单编号" prop="ordercode">
           <el-input v-model="form.ordercode" placeholder="请输入订单编号" />
@@ -315,7 +252,8 @@
             v-model="form.planstart"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="选择计划上机时间">
+            placeholder="选择计划上机时间"
+          >
           </el-date-picker>
         </el-form-item>
 
@@ -420,6 +358,48 @@ export default {
       openShangZhou: false,
       // 织轴状态字典
       shaftstatusOptions: [],
+      // 开卡时间
+      //日期范围
+      dateRange:[],
+      datePlanEndRange:[],
+      dateActStartRange:[],
+      //快捷选项
+      pickerOptions: {
+        shortcuts: [{
+          text: '未来一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            end.setTime(end.getTime() + 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+            picker.$emit('pick', [start, end]);
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date();
+            const start = new Date();
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+            picker.$emit('pick', [start, end]);
+          }
+        }]
+      },
+
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -455,7 +435,7 @@ export default {
         pdtcode: [
           { required: true, message: "品种编号不能为空", trigger: "blur" }
         ],
-        pdtweftshrinkage: [
+        pdtweftdensity: [
           { required: true, message: "品种纬密不能为空", trigger: "blur" }
         ],
       },
@@ -483,7 +463,7 @@ export default {
     /** 查询织轴列表列表 */
     getList() {
       this.loading = true;
-      listShaft(this.queryParams).then(response => {
+      listShaft(this.addAllDateRange(this.queryParams,this.dateRange,this.datePlanEndRange,this.dateActStartRange)).then(response => {
         this.shaftList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -507,9 +487,9 @@ export default {
         shaftno: null,
         shaftlength: null,
         pdtcode: null,
-        pdtweftshrinkage: null,
+        pdtweftdensity: null,
         ordercode: null,
-        shaftstatus: null,
+        shaftstatus: "未上轴",
         shaftremainlength: null,
         clothlength: null,
         shaftworker: null,
@@ -544,6 +524,15 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
+    // 表格排序
+    sortChange(selection) {
+      this.queryParams.sortProp = selection.prop;
+      if (selection.order){
+        this.queryParams.sortOrder =  selection.order=="descending"?"desc":"asc"
+      }
+      this.getList();
+    },
+
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
@@ -552,7 +541,13 @@ export default {
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      // TODO 修改织轴的话 要根据状态来 如果已经上轴了 判断修改的值 修改相应的状态
+      // TODO 修改织轴的话 先做成不能修改已经上轴了的
+      if (row){
+        if (row.actstart){
+          this.$message("不能修改已上机的织轴");
+          return;
+        }
+      }
       this.reset();
       const id = row.id || this.ids
       getShaft(id).then(response => {
@@ -565,6 +560,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          console.log(this.form)
           if (this.form.id != null) {
             updateShaft(this.form).then(response => {
               if (response.code === 200) {
@@ -587,8 +583,13 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      console.log(this.ids);
       const ids = row.id || this.ids;
+      if (row){
+        if (row.actstart){
+          this.$message("不能删除已上机的织轴");
+          return;
+        }
+      }
       this.$confirm('是否确认删除织轴列表编号为"' + ids + '"的数据项?', "警告", {
           confirmButtonText: "确定",
           cancelButtonText: "取消",
@@ -620,7 +621,7 @@ export default {
         this.machineAllList = response.rows;
         // console.log(this.machineList);
       });
-      listShaft({shaftstatus:"0"}).then(response => {
+      listShaft({"shaftstatus":"未上轴"}).then(response => {
         this.shaftAllList = response.rows;
         this.openShangZhou = true;
         this.title = "织机上轴";
@@ -643,6 +644,25 @@ export default {
         }
       });
     },
+    // 添加日期选项
+    addAllDateRange(params, dateRange,datePlanEndRange,dateActStartRange,) {
+      var search = params;
+      search.beginTime = "";
+      search.endTime = "";
+      if (null != dateRange && '' != dateRange) {
+        search.beginTime = this.dateRange[0];
+        search.endTime = this.dateRange[1];
+      }
+      if (null != datePlanEndRange && '' != datePlanEndRange) {
+        search.beginPlanEndTime = this.datePlanEndRange[0];
+        search.endPlanEndTime = this.datePlanEndRange[1];
+      }
+      if (null != dateActStartRange && '' != dateActStartRange) {
+        search.beginActStartTime = this.dateActStartRange[0];
+        search.endActStartTime = this.dateActStartRange[1];
+      }
+      return search;
+    }
   }
 };
 </script>

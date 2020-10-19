@@ -39,7 +39,7 @@ public class MftShaft extends BaseEntity
 
     /** 品种纬密 */
     @Excel(name = "品种纬密")
-    private BigDecimal pdtweftshrinkage;
+    private BigDecimal pdtweftdensity;
 
     /** 订单编号 */
     @Excel(name = "订单编号")
@@ -169,14 +169,14 @@ public class MftShaft extends BaseEntity
     {
         return pdtcode;
     }
-    public void setPdtweftshrinkage(BigDecimal pdtweftshrinkage) 
+    public void setPdtweftdensity(BigDecimal pdtweftdensity) 
     {
-        this.pdtweftshrinkage = pdtweftshrinkage;
+        this.pdtweftdensity = pdtweftdensity;
     }
 
-    public BigDecimal getPdtweftshrinkage() 
+    public BigDecimal getPdtweftdensity() 
     {
-        return pdtweftshrinkage;
+        return pdtweftdensity;
     }
     public void setOrdercode(String ordercode) 
     {
@@ -304,7 +304,7 @@ public class MftShaft extends BaseEntity
             .append("shaftno", getShaftno())
             .append("shaftlength", getShaftlength())
             .append("pdtcode", getPdtcode())
-            .append("pdtweftshrinkage", getPdtweftshrinkage())
+            .append("pdtweftdensity", getPdtweftdensity())
             .append("ordercode", getOrdercode())
             .append("shaftstatus", getShaftstatus())
             .append("shaftremainlength", getShaftremainlength())

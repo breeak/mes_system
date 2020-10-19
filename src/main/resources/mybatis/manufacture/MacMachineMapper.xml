@@ -18,10 +18,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="maccolumn"    column="macColumn"    />
         <result property="macrow"    column="macRow"    />
         <result property="remark"    column="remark"    />
+        <result property="middleno"    column="middleno"    />
+        <result property="stationno"    column="stationno"    />
+        <result property="weftdensity"    column="weftdensity"    />
+        <result property="weavinglength"    column="weavinglength"    />
     </resultMap>
 
     <sql id="selectMacMachineVo">
-        select id, macCode, macType, macStatus, macSpeed, macEfficiency, pdtCode, shaftCode, orderCode, updateTime, macColumn, macRow, remark from mac_machine
+        select id, macCode, macType, macStatus, macSpeed, macEfficiency, pdtCode, shaftCode, orderCode, updateTime, macColumn, macRow, remark,stationno,middleno,weftdensity,weavinglength from mac_machine
     </sql>
 
     <select id="selectMacMachineList" parameterType="MacMachine" resultMap="MacMachineResult">
@@ -34,9 +38,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="params.beginMacefficiency != null and params.beginMacefficiency != '' and params.endMacefficiency != null and params.endMacefficiency != ''"> and macEfficiency between #{params.beginMacefficiency} and #{params.endMacefficiency}</if>
             <if test="pdtcode != null  and pdtcode != ''"> and pdtCode = #{pdtcode}</if>
             <if test="shaftcode != null  and shaftcode != ''"> and shaftCode = #{shaftcode}</if>
-            <if test="params.beginUpdatetime != null and params.beginUpdatetime != '' and params.endUpdatetime != null and params.endUpdatetime != ''"> and updateTime between #{params.beginUpdatetime} and #{params.endUpdatetime}</if>
+            <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and updateTime between #{params.beginTime} and #{params.endTime}</if>
         </where>
-        order by macColumn,macRow
+        order by
+        <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">
+           ${params.sortProp} ${params.sortOrder},
+        </if>
+        macColumn, macRow
     </select>
     
     <select id="selectMacMachineById" parameterType="Long" resultMap="MacMachineResult">
@@ -59,6 +67,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="maccolumn != null">macColumn,</if>
             <if test="macrow != null">macRow,</if>
             <if test="remark != null">remark,</if>
+            <if test="middleno != null">middleno,</if>
+            <if test="stationno != null">stationno,</if>
+            <if test="weftdensity != null">weftdensity,</if>
+            <if test="weavinglength != null">weavinglength,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="maccode != null and maccode != ''">#{maccode},</if>
@@ -73,6 +85,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="maccolumn != null">#{maccolumn},</if>
             <if test="macrow != null">#{macrow},</if>
             <if test="remark != null">#{remark},</if>
+            <if test="middleno != null">#{middleno},</if>
+            <if test="stationno != null">#{stationno},</if>
+            <if test="weftdensity != null">#{weftdensity},</if>
+            <if test="weavinglength != null">#{weavinglength},</if>
          </trim>
     </insert>
 
@@ -91,6 +107,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="maccolumn != null">macColumn = #{maccolumn},</if>
             <if test="macrow != null">macRow = #{macrow},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="middleno != null">middleno = #{middleno},</if>
+            <if test="stationno != null">stationno = #{stationno},</if>
+            <if test="weftdensity != null">weftdensity = #{weftdensity},</if>
+            <if test="weavinglength != null">weavinglength = #{weavinglength},</if>
         </trim>
         where id = #{id}
     </update>

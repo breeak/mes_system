@@ -10,7 +10,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="shaftno"    column="shaftNo"    />
         <result property="shaftlength"    column="shaftLength"    />
         <result property="pdtcode"    column="pdtCode"    />
-        <result property="pdtweftshrinkage"    column="pdtWeftShrinkage"    />
+        <result property="pdtweftdensity"    column="pdtweftdensity"    />
         <result property="ordercode"    column="orderCode"    />
         <result property="shaftstatus"    column="shaftStatus"    />
         <result property="shaftremainlength"    column="shaftRemainLength"    />
@@ -30,7 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectMftShaftVo">
-        select id, shaftCode, shaftNo, shaftLength, pdtCode, pdtWeftShrinkage, orderCode, shaftStatus, shaftRemainLength, clothLength, shaftWorker, warpBacth, weftBacth, createTime, updateTime, planStart, planEnd, actStart, actEnd, planMacCode, actMacCode, remark from mft_shaft
+        select id, shaftCode, shaftNo, shaftLength, pdtCode, pdtweftdensity, orderCode, shaftStatus, shaftRemainLength, clothLength, shaftWorker, warpBacth, weftBacth, createTime, updateTime, planStart, planEnd, actStart, actEnd, planMacCode, actMacCode, remark from mft_shaft
     </sql>
 
     <select id="selectMftShaftList" parameterType="MftShaft" resultMap="MftShaftResult">
@@ -53,7 +53,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="actstart != null "> and actStart = #{actstart}</if>
             <if test="actend != null "> and actEnd = #{actend}</if>
             <if test="actmaccode != null  and actmaccode != ''"> and actMacCode = #{actmaccode}</if>
+            <if test="params.beginPlanEndTime != null and params.beginPlanEndTime != '' and params.endPlanEndTime != null and params.endPlanEndTime != ''"> and planend between #{params.beginPlanEndTime} and #{params.endPlanEndTime}</if>
+            <if test="params.beginActStartTime != null and params.beginActStartTime != '' and params.endActStartTime != null and params.endActStartTime != ''"> and actend between #{params.beginActStartTime} and #{params.endActStartTime}</if>
+            <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and createTime between #{params.beginTime} and #{params.endTime}</if>
         </where>
+        order by
+        <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">
+            ${params.sortProp} ${params.sortOrder},
+        </if>
+        updateTime desc
+
     </select>
     
     <select id="selectMftShaftById" parameterType="Long" resultMap="MftShaftResult">
@@ -68,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shaftno != null">shaftNo,</if>
             <if test="shaftlength != null">shaftLength,</if>
             <if test="pdtcode != null and pdtcode != ''">pdtCode,</if>
-            <if test="pdtweftshrinkage != null">pdtWeftShrinkage,</if>
+            <if test="pdtweftdensity != null">pdtweftdensity,</if>
             <if test="ordercode != null">orderCode,</if>
             <if test="shaftstatus != null">shaftStatus,</if>
             <if test="shaftremainlength != null">shaftRemainLength,</if>
@@ -91,7 +100,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shaftno != null">#{shaftno},</if>
             <if test="shaftlength != null">#{shaftlength},</if>
             <if test="pdtcode != null and pdtcode != ''">#{pdtcode},</if>
-            <if test="pdtweftshrinkage != null">#{pdtweftshrinkage},</if>
+            <if test="pdtweftdensity != null">#{pdtweftdensity},</if>
             <if test="ordercode != null">#{ordercode},</if>
             <if test="shaftstatus != null">#{shaftstatus},</if>
             <if test="shaftremainlength != null">#{shaftremainlength},</if>
@@ -118,7 +127,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shaftno != null">shaftNo = #{shaftno},</if>
             <if test="shaftlength != null">shaftLength = #{shaftlength},</if>
             <if test="pdtcode != null and pdtcode != ''">pdtCode = #{pdtcode},</if>
-            <if test="pdtweftshrinkage != null">pdtWeftShrinkage = #{pdtweftshrinkage},</if>
+            <if test="pdtweftdensity != null">pdtweftdensity = #{pdtweftdensity},</if>
             <if test="ordercode != null">orderCode = #{ordercode},</if>
             <if test="shaftstatus != null">shaftStatus = #{shaftstatus},</if>
             <if test="shaftremainlength != null">shaftRemainLength = #{shaftremainlength},</if>

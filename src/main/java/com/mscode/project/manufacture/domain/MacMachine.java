@@ -6,6 +6,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import com.mscode.framework.aspectj.lang.annotation.Excel;
 import com.mscode.framework.web.domain.BaseEntity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -66,6 +67,49 @@ public class MacMachine extends BaseEntity
     @Excel(name = "更新时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss", type = Excel.Type.EXPORT)
     private Date updatetime;
 
+    private String middleno;
+    private Long stationno;
+    /** 纬密根/10cm */
+    @Excel(name = "纬密根/10cm")
+    private BigDecimal weftdensity;
+
+    public BigDecimal getWeavinglength() {
+        return weavinglength;
+    }
+
+    public void setWeavinglength(BigDecimal weavinglength) {
+        this.weavinglength = weavinglength;
+    }
+
+    /** 织造长度 */
+    @Excel(name = "纬密根/10cm")
+    private BigDecimal weavinglength;
+
+
+
+    public BigDecimal getWeftdensity() {
+        return weftdensity;
+    }
+
+    public void setWeftdensity(BigDecimal weftdensity) {
+        this.weftdensity = weftdensity;
+    }
+
+    public String getMiddleno() {
+        return middleno;
+    }
+
+    public void setMiddleno(String middleno) {
+        this.middleno = middleno;
+    }
+
+    public Long getStationno() {
+        return stationno;
+    }
+
+    public void setStationno(Long stationno) {
+        this.stationno = stationno;
+    }
 
     public Date getUpdatetime() {
         return updatetime;
@@ -184,6 +228,7 @@ public class MacMachine extends BaseEntity
             .append("macstatus", getMacstatus())
             .append("macspeed", getMacspeed())
             .append("macefficiency", getMacefficiency())
+            .append("weftdensity", getWeftdensity())
             .append("pdtcode", getPdtcode())
             .append("shaftcode", getShaftcode())
             .append("ordercode", getOrdercode())

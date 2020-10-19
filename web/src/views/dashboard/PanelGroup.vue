@@ -2,54 +2,54 @@
 
   <el-row :gutter="40" class="panel-group">
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('newVisitis')">
+      <div class="card-panel" @click="handleSetLineChartData('速度统计')">
         <div class="card-panel-icon-wrapper icon-people">
-          <svg-icon icon-class="peoples" class-name="card-panel-icon" />
+          <svg-icon icon-class="date" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
             班次平均车速
           </div>
-          <count-to :start-val="0" :end-val="680" :duration="2600" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="avgSpeed" :duration="2000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('messages')">
+      <div class="card-panel" @click="handleSetLineChartData('效率统计')">
         <div class="card-panel-icon-wrapper icon-message">
-          <svg-icon icon-class="message" class-name="card-panel-icon" />
+          <svg-icon icon-class="chart" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            班次平均效率
+            班次平均效率(%)
           </div>
-          <count-to :start-val="0" :end-val="81.25" :decimals="2" :duration="3000" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="avgEfficiency" :decimals="2" :duration="2000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('purchases')">
+      <div class="card-panel" @click="handleSetLineChartData('产量统计')">
         <div class="card-panel-icon-wrapper icon-money">
           <svg-icon icon-class="money" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            班次总产量
+            班次总产量(m)
           </div>
-          <count-to :start-val="0" :end-val="9280" :duration="3200" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="allWeavingLength" :duration="2000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('shoppings')">
+      <div class="card-panel" @click="handleSetLineChartData('运行统计')">
         <div class="card-panel-icon-wrapper icon-shopping">
-          <svg-icon icon-class="shopping" class-name="card-panel-icon" />
+          <svg-icon icon-class="dashboard" class-name="card-panel-icon" />
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
             停台总数
           </div>
-          <count-to :start-val="0" :end-val="13" :duration="36" class="card-panel-num" />
+          <count-to :start-val="0" :end-val="stopMacNum" :duration="2000" class="card-panel-num" />
         </div>
       </div>
     </el-col>
@@ -64,6 +64,30 @@ import CountTo from 'vue-count-to'
 export default {
   components: {
     CountTo
+  },
+  props: {
+    avgSpeed:{
+      type: Number,
+      default: 404
+    },
+    avgEfficiency:{
+      type: Number,
+      default: 404
+    },
+    allWeavingLength:{
+      type: Number,
+      default: 404
+    },
+    stopMacNum:{
+      type: Number,
+      default: 404
+    },
+  },
+
+  data() {
+    return {
+
+    }
   },
   methods: {
     handleSetLineChartData(type) {

@@ -66,6 +66,10 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="更新时间">
+        <el-date-picker v-model="dateRange" size="small" style="width: 240px" value-format="yyyy-MM-dd" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+      </el-form-item>
+
       <!--<el-form-item label="更新时间" prop="updatetime">
         <el-date-picker clearable size="small" style="width: 200px"
           v-model="queryParams.updatetime"
@@ -88,7 +92,7 @@
           size="mini"
           @click="handleAdd"
           v-hasPermi="['manufacture:machine:add']"
-        >新增织机</el-button>  <!--TODO 权限管理-->
+        >新增织机</el-button>  <!--TODO 权限管理 检查-->
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -132,28 +136,28 @@
 	  <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="machineList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="machineList" @selection-change="handleSelectionChange" @sort-change='sortChange' >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="织机编号" align="center" prop="maccode" />
-      <el-table-column label="织机类型" align="center" prop="mactype" :formatter="mactypeFormat" />
+      <el-table-column sortable='custom' width="100"  label="织机编号" align="center" prop="maccode" />
+      <el-table-column label="织机类型"  align="center" prop="mactype" :formatter="mactypeFormat" />
       <el-table-column label="织机状态" align="center" prop="macstatus" :formatter="macstatusFormat" />
-      <el-table-column label="织机速度" align="center" prop="macspeed" />
-      <el-table-column label="织机效率" align="center" prop="macefficiency" >
+      <el-table-column sortable='custom' width="100" label="织机速度" align="center" prop="macspeed" />
+      <el-table-column sortable='custom' width="100" label="织机效率" align="center" prop="macefficiency" >
         <template slot-scope="scope">
           <span>{{ parseFloat(scope.row.macefficiency).toFixed(2) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="品种编号" align="center" prop="pdtcode" />
+      <el-table-column label="纬密根/10cm"  width="100" align="center" prop="weftdensity" />
       <el-table-column label="上机卡号" align="center" prop="shaftcode" />
       <!--<el-table-column label="订单编号" align="center" prop="ordercode" />-->
-      <el-table-column label="更新时间" align="center" prop="updatetime" width="180">
+      <el-table-column sortable='custom' label="更新时间" align="center" prop="updatetime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.updatetime, ) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="位置列" align="center" prop="maccolumn" />
-      <el-table-column label="位置行" align="center" prop="macrow" />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="位置列" align="center" prop="maccolumn" width="55"  />
+      <el-table-column label="位置行" align="center" prop="macrow" width="55"  />
       <!--<el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -330,6 +334,8 @@ export default {
       mactypeOptions: [],
       // 织机状态字典
       macstatusOptions: [],
+      //日期范围
+      dateRange:[],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -341,7 +347,6 @@ export default {
         macefficiency: null,
         pdtcode: null,
         shaftcode: null,
-        updatetime: null,
       },
       // 表单参数
       form: {},
@@ -379,7 +384,7 @@ export default {
     /** 查询织机列表列表 */
     getList() {
       this.loading = true;
-      listMachine(this.queryParams).then(response => {
+      listMachine(this.addDateRange(this.queryParams, this.dateRange)).then(response => {
         this.machineList = response.rows;
         this.total = response.total;
         this.loading = false;
@@ -428,6 +433,7 @@ export default {
     },
     /** 重置按钮操作 */
     resetQuery() {
+      this.dateRange = [];
       this.resetForm("queryForm");
       this.handleQuery();
     },
@@ -437,6 +443,15 @@ export default {
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
+    // 表格排序
+    sortChange(selection) {
+      this.queryParams.sortProp = selection.prop;
+      if (selection.order){
+        this.queryParams.sortOrder =  selection.order=="descending"?"desc":"asc"
+      }
+      this.getList();
+    },
+
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();

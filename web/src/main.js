@@ -12,7 +12,9 @@ import '@/assets/styles/mscode.scss' // mscode css
 import App from './App'
 import store from './store'
 import router from './router'
+
 import permission from './directive/permission'
+
 
 import './assets/icons' // icon
 import './permission' // permission control
@@ -51,6 +53,7 @@ Vue.component('Pagination', Pagination)
 Vue.component('RightToolbar', RightToolbar)
 
 Vue.use(permission)
+
 
 /**
  * If you don't want to use mock-server

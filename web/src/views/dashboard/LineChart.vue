@@ -1,5 +1,5 @@
 <template>
-  <div :class="className" :style="{height:height,width:width}" />
+    <div :class="className" :style="{height:height,width:width}" />
 </template>
 
 <script>
@@ -29,6 +29,10 @@ export default {
     chartData: {
       type: Object,
       required: true
+    },
+    showtype: {
+      type: String,
+      required: true
     }
   },
   data() {
@@ -40,13 +44,20 @@ export default {
     chartData: {
       deep: true,
       handler(val) {
-        this.setOptions(val)
+        this.initChart()
+      }
+    },
+    showtype: {
+      deep: true,
+      handler(val) {
+        this.initChart()
       }
     }
+
   },
   mounted() {
     this.$nextTick(() => {
-      this.initChart()
+      //this.initChart()
     })
   },
   beforeDestroy() {
@@ -59,12 +70,12 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-      this.setOptions(this.chartData)
+      this.setOptions(this.chartData,this.showtype)
     },
-    setOptions({ expectedData, actualData } = {}) {
+    setOptions(chartData,showtype) {
       this.chart.setOption({
         xAxis: {
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          data: chartData["时间列表"]["日期"],
           boundaryGap: false,
           axisTick: {
             show: false
@@ -90,10 +101,13 @@ export default {
           }
         },
         legend: {
-          data: ['expected', 'actual']
+          data: ['早班', '中班','晚班','总计'],
+          selected:{
+            '总计':false
+          }
         },
         series: [{
-          name: 'expected', itemStyle: {
+          name: '早班', itemStyle: {
             normal: {
               color: '#FF005A',
               lineStyle: {
@@ -104,12 +118,12 @@ export default {
           },
           smooth: true,
           type: 'line',
-          data: expectedData,
+          data: chartData[showtype]['早班'],
           animationDuration: 2800,
           animationEasing: 'cubicInOut'
         },
         {
-          name: 'actual',
+          name: '中班',
           smooth: true,
           type: 'line',
           itemStyle: {
@@ -124,10 +138,50 @@ export default {
               }
             }
           },
-          data: actualData,
+          data: chartData[showtype]['中班'],
           animationDuration: 2800,
           animationEasing: 'quadraticOut'
-        }]
+        },
+          {
+            name: '晚班',
+            smooth: true,
+            type: 'line',
+            itemStyle: {
+              normal: {
+                color: '#ffcb8c',
+                lineStyle: {
+                  color: '#ffcb8c',
+                  width: 2
+                },
+                areaStyle: {
+                  color: '#f3f8ff'
+                }
+              }
+            },
+            data: chartData[showtype]['晚班'],
+            animationDuration: 2800,
+            animationEasing: 'quadraticOut'
+          },
+          {
+            name: '总计',
+            smooth: true,
+            type: 'line',
+            itemStyle: {
+              normal: {
+                color: '#c8b2f4',
+                lineStyle: {
+                  color: '#c8b2f4',
+                  width: 2
+                },
+                areaStyle: {
+                  color: '#f3f8ff'
+                }
+              }
+            },
+            data: chartData[showtype]['总计'],
+            animationDuration: 2800,
+            animationEasing: 'quadraticOut'
+          }]
       })
     }
   }

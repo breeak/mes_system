@@ -21,6 +21,10 @@ export default {
     height: {
       type: String,
       default: '300px'
+    },
+    chartData:{
+      type:Array,
+      required:true
     }
   },
   data() {
@@ -28,6 +32,15 @@ export default {
       chart: null
     }
   },
+  watch: {
+    chartData: {
+      deep: true,
+      handler(val) {
+        this.setOptions(val)
+      }
+    }
+  },
+
   mounted() {
     this.$nextTick(() => {
       this.initChart()
@@ -43,7 +56,9 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
+      this.setOptions(this.chartData)
+    },
+    setOptions(chartData){
       this.chart.setOption({
         tooltip: {
           trigger: 'item',
@@ -52,22 +67,16 @@ export default {
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['Industries', 'Technology', 'Forex', 'Gold', 'Forecasts']
+          data: ['运转', '经停', '纬停', '其他停', '离线']
         },
         series: [
           {
-            name: 'WEEKLY WRITE ARTICLES',
+            name: '机台状态统计',
             type: 'pie',
-            roseType: 'radius',
-            radius: [15, 95],
-            center: ['50%', '38%'],
-            data: [
-              { value: 320, name: 'Industries' },
-              { value: 240, name: 'Technology' },
-              { value: 149, name: 'Forex' },
-              { value: 100, name: 'Gold' },
-              { value: 59, name: 'Forecasts' }
-            ],
+            roseType: false,
+            radius: [20, 95],
+            center: ['50%', '50%'],
+            data: chartData,
             animationEasing: 'cubicInOut',
             animationDuration: 2600
           }

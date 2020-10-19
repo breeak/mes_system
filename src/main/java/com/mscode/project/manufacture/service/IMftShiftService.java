@@ -58,4 +58,11 @@ public interface IMftShiftService
      * @return 结果
      */
     public int deleteMftShiftById(Long id);
+
+    /**
+     *  列出最近天数的班次生产记录
+     * @param days
+     * @return
+     */
+    Object listRecentDays(Integer days);
 }

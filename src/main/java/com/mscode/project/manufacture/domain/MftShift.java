@@ -105,6 +105,26 @@ public class MftShift extends BaseEntity
     @Excel(name = "班次产量")
     private BigDecimal shiftlength;
 
+
+    private String middleno;
+    private Long stationno;
+
+    public String getMiddleno() {
+        return middleno;
+    }
+
+    public void setMiddleno(String middleno) {
+        this.middleno = middleno;
+    }
+
+    public Long getStationno() {
+        return stationno;
+    }
+
+    public void setStationno(Long stationno) {
+        this.stationno = stationno;
+    }
+
     /** 班次日期 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "班次日期", width = 30, dateFormat = "yyyy-MM-dd")

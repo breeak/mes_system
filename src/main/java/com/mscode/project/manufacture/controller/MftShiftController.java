@@ -1,16 +1,12 @@
 package com.mscode.project.manufacture.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.mscode.framework.aspectj.lang.annotation.Log;
 import com.mscode.framework.aspectj.lang.enums.BusinessType;
 import com.mscode.project.manufacture.domain.MftShift;
@@ -38,11 +34,22 @@ public class MftShiftController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manufacture:shift:list')")
     @GetMapping("/list")
-    public TableDataInfo list(MftShift mftShift)
+    public TableDataInfo list(MftShift mftShift, @RequestParam Map<String,Object> params)
     {
         startPage();
+        mftShift.setParams(params);
         List<MftShift> list = mftShiftService.selectMftShiftList(mftShift);
         return getDataTable(list);
+    }
+
+    /**
+     * 查询班次最近days生产情况
+     */
+    @PreAuthorize("@ss.hasPermi('manufacture:shift:list')")
+    @GetMapping("/recent/{days}")
+    public AjaxResult shiftRecent(@PathVariable Integer days)
+    {
+        return AjaxResult.success(mftShiftService.listRecentDays(days));
     }
 
     /**

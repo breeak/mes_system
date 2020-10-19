@@ -1,7 +1,9 @@
 package com.mscode.project.manufacture.controller;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.mscode.project.manufacture.domain.MacMachine;
 import com.mscode.project.manufacture.domain.MftShift;
@@ -9,14 +11,7 @@ import com.mscode.project.manufacture.service.IMacMachineService;
 import com.mscode.project.manufacture.service.IMftShiftService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.mscode.framework.aspectj.lang.annotation.Log;
 import com.mscode.framework.aspectj.lang.enums.BusinessType;
 import com.mscode.project.manufacture.domain.MftShaft;
@@ -47,9 +42,10 @@ public class MftShaftController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('manufacture:shaft:list')")
     @GetMapping("/list")
-    public TableDataInfo list(MftShaft mftShaft)
+    public TableDataInfo list(MftShaft mftShaft, @RequestParam Map<String,Object> params)
     {
         startPage();
+        mftShaft.setParams(params);
         List<MftShaft> list = mftShaftService.selectMftShaftList(mftShaft);
         return getDataTable(list);
     }
@@ -113,7 +109,7 @@ public class MftShaftController extends BaseController
         List<MftShaft> mftShafts = mftShaftService.selectMftShaftList(mftshaftQuery);
         if (mftShafts.size()==1){
             MftShaft shaft =mftShafts.get(0);
-            shaft.setShaftstatus("1");
+            shaft.setShaftstatus("已了机");
             shaft.setUpdatetime(new Date());
             shaft.setActstart(mftShaft.getActstart());
             shaft.setActmaccode(mftShaft.getActmaccode());
@@ -127,6 +123,8 @@ public class MftShaftController extends BaseController
                 machine.setPdtcode(shaft.getPdtcode());
                 machine.setOrdercode(shaft.getOrdercode());
                 machine.setShaftcode(shaft.getShaftcode());
+                machine.setWeftdensity(shaft.getPdtweftdensity());
+                machine.setWeavinglength(new BigDecimal(0));
                 machine.setUpdatetime(new Date());
 
                 // 更新班次信息
