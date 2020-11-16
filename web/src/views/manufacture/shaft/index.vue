@@ -112,14 +112,14 @@
         >修改织轴</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button
+        <!--<el-button
           type="danger"
           icon="el-icon-delete"
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
           v-hasPermi="['manufacture:shaft:remove']"
-        >删除织轴</el-button> <!--// TODO 判断能否删除-->
+        >删除织轴</el-button>--> <!--// TODO 判断能否删除 先不批量删除-->
       </el-col>
       <el-col :span="1.5">
         <el-button
@@ -138,7 +138,15 @@
           @click="handleShangZhou"
           v-hasPermi="['manufacture:shaft:edit']"
         >织机上轴</el-button>
-        <!--TODO 织轴了机或修改上轴编号-->
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="danger"
+          icon="el-icon-download"
+          size="mini"
+          @click="handleShangZhouAll"
+          v-hasPermi="['manufacture:shaft:edit']"
+        >新增上轴</el-button>
       </el-col>
 	  <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -148,7 +156,12 @@
       <el-table-column sortable='custom' width="100" label="织轴卡号" align="center" prop="shaftcode" />
       <el-table-column sortable='custom' width="100" label="织轴长度" align="center" prop="shaftlength" />
       <el-table-column label="品种编号" align="center" prop="pdtcode" />
-      <el-table-column label="品种纬密" align="center" prop="pdtweftdensity" />
+      <el-table-column label="纬密根/英寸" align="center" prop="pdtweftdensity">
+        <template slot-scope="scope">
+          <span>{{(scope.row.pdtweftdensity*0.254).toFixed(2)}}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="缩率%" align="center" prop="pdtshrinkage" />
       <el-table-column label="订单编号" align="center" prop="ordercode" />
       <el-table-column label="织轴状态" align="center" prop="shaftstatus" :formatter="shaftstatusFormat" />
       <el-table-column sortable='custom' width="100" label="余轴长度" align="center" prop="shaftremainlength" />
@@ -198,13 +211,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['manufacture:shaft:edit']"
           >修改</el-button>
-          <!--<el-button
+          <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['manufacture:shaft:remove']"
-          >删除</el-button>-->
+          >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -220,20 +233,23 @@
     <!-- 添加或修改织轴列表对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="120px">
-        <el-form-item v-show="false" label="织轴卡号" prop="shaftcode">
+        <el-form-item v-show="false" label="织轴状态 用于保存的 用户不可见" >
           <el-input v-model="form.shaftstatus" value="未上轴" />
         </el-form-item>
         <el-form-item label="织轴卡号" prop="shaftcode">
           <el-input v-model="form.shaftcode" placeholder="请输入织轴卡号(开卡用唯一)" />
         </el-form-item>
         <el-form-item label="织轴长度" prop="shaftlength">
-          <el-input v-model="form.shaftlength" placeholder="请输入织轴长度" />
+          <el-input v-model.number="form.shaftlength" type="number" placeholder="请输入织轴长度" />
         </el-form-item>
         <el-form-item label="品种编号" prop="pdtcode">
           <el-input v-model="form.pdtcode" placeholder="请输入品种编号" />
         </el-form-item>
-        <el-form-item label="纬密根/10cm" prop="pdtweftdensity">
-          <el-input v-model="form.pdtweftdensity" placeholder="请输入品种纬密" />
+        <el-form-item label="纬密根/英寸" prop="pdtweftdensity">
+          <el-input v-model.number="form.pdtweftdensity" type="number" placeholder="请输入品种纬密" />
+        </el-form-item>
+        <el-form-item label="缩率%" prop="pdtshrinkage">
+          <el-input v-model.number="form.pdtshrinkage" type="number" placeholder="请输入缩率" />
         </el-form-item>
         <el-form-item label="订单编号" prop="ordercode">
           <el-input v-model="form.ordercode" placeholder="请输入订单编号" />
@@ -264,7 +280,65 @@
       </div>
     </el-dialog>
 
+    <!-- 添加或修改织轴列表对话框 -->
+    <el-dialog :title="title" :visible.sync="openShangZhouAll" width="500px" append-to-body>
+      <el-form ref="formShangZhouAll" :model="form" :rules="rulesShangZhouAll" label-width="120px">
+        <el-form-item v-show="false" label="织轴状态 用于保存的 用户不可见" >
+          <el-input v-model="form.shaftstatus" value="未上轴" />
+        </el-form-item>
+        <el-form-item label="织轴卡号" prop="shaftcode">
+          <el-input v-model="form.shaftcode" placeholder="请输入织轴卡号(开卡用唯一)" />
+        </el-form-item>
+        <el-form-item label="织轴长度" prop="shaftlength">
+          <el-input v-model.number="form.shaftlength" type="number" placeholder="请输入织轴长度" />
+        </el-form-item>
+        <el-form-item label="品种编号" prop="pdtcode">
+          <el-input v-model="form.pdtcode" placeholder="请输入品种编号" />
+        </el-form-item>
+        <el-form-item label="纬密根/英寸" prop="pdtweftdensity">
+          <el-input v-model.number="form.pdtweftdensity" type="number" placeholder="请输入品种纬密" />
+        </el-form-item>
+        <el-form-item label="缩率" prop="pdtshrinkage">
+          <el-input v-model.number="form.pdtshrinkage" type="number" placeholder="缩率" />
+        </el-form-item>
+        <el-form-item label="织机编号" prop="actmaccode">
+          <el-select v-model="form.actmaccode" placeholder="请选择织机编号" clearable filterable size="small">
+            <el-option
+              v-for="mac in machineAllList"
+              :key="mac.maccode"
+              :label="mac.maccode"
+              :value="mac.maccode"
+            />
+          </el-select>
+        </el-form-item>
 
+        <el-form-item label="上机时间" prop="actstart">
+          <el-date-picker clearable
+                          v-model="form.actstart"
+                          type="datetime"
+                          format = "yyyy-MM-dd HH:mm:ss"
+                          value-format="yyyy-MM-dd HH:mm:ss"
+                          placeholder="选择上机时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="订单编号" prop="ordercode">
+          <el-input v-model="form.ordercode" placeholder="请输入订单编号" />
+        </el-form-item>
+        <el-form-item label="操作员" prop="shaftworker">
+          <el-input v-model="form.shaftworker" placeholder="请输入操作员" />
+        </el-form-item>
+        <el-form-item label="经纱批次" prop="warpbacth">
+          <el-input v-model="form.warpbacth" placeholder="请输入经纱批次" />
+        </el-form-item>
+        <el-form-item label="纬纱批次" prop="weftbacth">
+          <el-input v-model="form.weftbacth" placeholder="请输入纬纱批次" />
+        </el-form-item>
+        </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFormShangZhouAll">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
     <!-- 添加或修改织机上轴对话框 -->
     <el-dialog :title="title" :visible.sync="openShangZhou" width="500px" append-to-body>
       <el-form ref="formShangZhou" :model="form" :rules="rulesShangZhou" label-width="80px">
@@ -292,6 +366,7 @@
           <el-date-picker clearable
                           v-model="form.actstart"
                           type="datetime"
+                          format = "yyyy-MM-dd HH:mm:ss"
                           value-format="yyyy-MM-dd HH:mm:ss"
                           placeholder="选择上机时间">
           </el-date-picker>
@@ -308,7 +383,7 @@
 </template>
 
 <script>
-import { doShangZhou,listShaft, getShaft, delShaft, addShaft, updateShaft, exportShaft } from "@/api/manufacture/shaft";
+import { doShangZhouAll,doShangZhou,listShaft, getShaft, delShaft, addShaft, updateShaft, exportShaft } from "@/api/manufacture/shaft";
 import { listMachine} from "@/api/manufacture/machine";
 
 export default {
@@ -330,7 +405,6 @@ export default {
         }
       });
     };
-
     return {
       // 遮罩层
       loading: true,
@@ -356,6 +430,7 @@ export default {
       open: false,
       // 是否显示上轴界面
       openShangZhou: false,
+      openShangZhouAll: false,
       // 织轴状态字典
       shaftstatusOptions: [],
       // 开卡时间
@@ -418,7 +493,7 @@ export default {
         createtime: null,
         planstart: null,
         planend: null,
-        actstart: null,
+        actstart: new Date(),
         actend: null,
         actmaccode: null,
       },
@@ -430,13 +505,19 @@ export default {
           { required: true, validator: checkShaftcode, trigger: 'blur' }
         ],
         shaftlength: [
-          { required: true, message: "织轴长度不能为空", trigger: "blur" }
+          { required: true, message: "请输入织轴长度", trigger: "blur" }
+          ,{ type:"number",min:1, message: '织轴长度应大于0', trigger: 'blur'  }
         ],
         pdtcode: [
           { required: true, message: "品种编号不能为空", trigger: "blur" }
         ],
         pdtweftdensity: [
           { required: true, message: "品种纬密不能为空", trigger: "blur" }
+          ,{ type:"number",min:1, message: '品种纬密应大于0', trigger: 'blur'  }
+        ],
+        pdtshrinkage: [
+          { required: true, message: "缩率不能为空", trigger: "blur" }
+          ,{ type:"number",min:1,max:99, message: '缩率应大于0,小于100', trigger: 'blur'  }
         ],
       },
       // 上轴表单校验
@@ -450,7 +531,34 @@ export default {
         actstart: [
         { required: true, message: "上机时间不能为空", trigger: "blur" }
       ],
-    }
+    },
+      // 上轴表单全部校验
+      rulesShangZhouAll: {
+        shaftcode: [
+          { required: true,validator:checkShaftcode, trigger: "blur" }
+        ],
+        shaftlength: [
+          { required: true, message: "织轴长度不能为空132", trigger: "blur" }
+          ,{ type:"number",min:1,message: '织轴长度应大于0', trigger: 'blur'  }
+        ],
+        pdtcode: [
+          { required: true, message: "品种编号不能为空", trigger: "blur" }
+        ],
+        pdtweftdensity: [
+          { required: true, message: "品种纬密不能为空", trigger: "blur" }
+          ,{ type:"number",min:1,message: '品种纬密应大于0', trigger: 'blur'  }
+        ],
+        pdtshrinkage: [
+          { required: true, message: "缩率不能为空", trigger: "blur" }
+          ,{ type:"number",min:1,max:99, message: '缩率应大于0,小于100', trigger: 'blur'  }
+        ],
+        actmaccode: [
+          { required: true, message: "织机编号不能为空", trigger: "blur" }
+        ],
+        actstart: [
+          { required: true, message: "上机时间不能为空", trigger: "blur" }
+        ],
+      }
     };
   },
   created() {
@@ -477,6 +585,7 @@ export default {
     cancel() {
       this.open = false;
       this.openShangZhou = false;
+      this.openShangZhouAll = false;
       this.reset();
     },
     // 表单重置
@@ -488,6 +597,7 @@ export default {
         shaftlength: null,
         pdtcode: null,
         pdtweftdensity: null,
+        pdtshrinkage: null,
         ordercode: null,
         shaftstatus: "未上轴",
         shaftremainlength: null,
@@ -538,6 +648,9 @@ export default {
       this.reset();
       this.open = true;
       this.title = "添加织轴列表";
+      this.form.actstart = this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')
+      this.form.pdtshrinkage = 3;
+
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -552,6 +665,10 @@ export default {
       const id = row.id || this.ids
       getShaft(id).then(response => {
         this.form = response.data;
+        if (response.data.actstart){
+          this.$message("不能修改已上机的织轴");
+          return;
+        }
         this.open = true;
         this.title = "修改织轴列表";
       });
@@ -560,7 +677,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          console.log(this.form)
+          this.form.pdtweftdensity = (this.form.pdtweftdensity*10/2.54).toFixed(2);
           if (this.form.id != null) {
             updateShaft(this.form).then(response => {
               if (response.code === 200) {
@@ -625,19 +742,48 @@ export default {
         this.shaftAllList = response.rows;
         this.openShangZhou = true;
         this.title = "织机上轴";
-        this.form.actstart = new Date();
+        this.form.actstart = this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}')
+        //this.form.pdtshrinkage = 3;
         // console.log(this.shaftList)
       });
     },
+    /** 织机上轴 */
+    handleShangZhouAll() {
+      this.reset();
+      listMachine().then(response => {
+        this.machineAllList = response.rows;
+        // console.log(this.machineList);
+        this.openShangZhouAll = true;
+        this.title = "织机上轴";
+        this.form.actstart = this.parseTime(new Date(),'{y}-{m}-{d} {h}:{i}:{s}');
+        this.form.pdtshrinkage = 3;
+      });
+    },
+
     /** 提交上轴 */
     submitFormShangZhou() {
       this.$refs["formShangZhou"].validate(valid => {
         if (valid) {
-          //console.log(this.form)
+          this.form.pdtweftdensity = (this.form.pdtweftdensity*10/2.54).toFixed(2);
           doShangZhou(this.form).then(response => {
             if (response.code === 200) {
               this.msgSuccess("上轴成功");
               this.openShangZhou = false;
+              this.getList();
+            }
+          });
+        }
+      });
+    },
+    /** 提交上轴所有 */
+    submitFormShangZhouAll() {
+      this.$refs["formShangZhouAll"].validate(valid => {
+        if (valid) {
+          this.form.pdtweftdensity = (this.form.pdtweftdensity*10/2.54).toFixed(2);
+          doShangZhouAll(this.form).then(response => {
+            if (response.code === 200) {
+              this.msgSuccess("上轴成功");
+              this.openShangZhouAll = false;
               this.getList();
             }
           });

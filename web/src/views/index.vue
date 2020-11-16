@@ -63,8 +63,10 @@ export default {
   },
   data() {
     return {
+      timer:"",
       avgSpeed:0,
       avgEfficiency:0,
+      avgEfficiencyList:[],
       allWeavingLength:0,
       runMacNum:0,
       stopMacNum:0,
@@ -87,63 +89,21 @@ export default {
       lineData: {}
     }
   },
-  created(){
-    //列出所有织机
-    listMachine({"sortProp":"macspeed","sortOrder":"desc"}).then(response => {
-      this.machineList = response.rows;
-      //计算平均车速
-      this.avgSpeed = 0;
-      this.avgEfficiency = 0;
-      this.stopMacNum=0,
-      this.weftStopNum=0,
-      this.warpStopNum=0,
-      this.otherStopNum=0,
-      this.offLineNum=0,
-      this.runMacNum=0,
-      this.allWeavingLength = 0;
-      this.getDicts("mac_common_status").then(response => {
-        this.mac_common_status=response.data;
-        // 获取状态对应value
-        this.mac_common_status.forEach((status, index, array) =>{
-          this.macStatusMap.set(status.dictLabel,status.dictValue);
-        })
-        // 统计数据
-        this.machineList.forEach((machine, index, array) =>{
-          this.avgSpeed = this.avgSpeed + machine.macspeed;
-          this.avgEfficiency = this.avgEfficiency + machine.macefficiency;
-          if (machine.macstatus ==  this.macStatusMap.get("运转") ) {
-            this.runMacNum = this.runMacNum + 1;
-          }else if (machine.macstatus == this.macStatusMap.get("离线") ) {
-            this.offLineNum = this.offLineNum + 1;
-          }else if (machine.macstatus == this.macStatusMap.get("经停") ) {
-            this.warpStopNum = this.warpStopNum + 1;
-            this.stopMacNum = this.stopMacNum + 1;
-          }else if (machine.macstatus == this.macStatusMap.get("纬停") ) {
-            this.weftStopNum = this.weftStopNum + 1;
-            this.stopMacNum = this.stopMacNum + 1;
-          }else if (machine.macstatus == this.macStatusMap.get("其他停") ) {
-            this.otherStopNum = this.otherStopNum + 1;
-            this.stopMacNum = this.stopMacNum + 1;
-          }
-        })
-        this.avgEfficiency = this.avgEfficiency/this.machineList.length;
-        this.avgSpeed = this.avgSpeed/this.machineList.length;
-        this.pieData = [
-          { value: this.runMacNum.toFixed(2), name: '运转' },
-          { value: this.warpStopNum.toFixed(2), name: '经停' },
-          { value: this.weftStopNum.toFixed(2), name: '纬停' },
-          { value: this.otherStopNum.toFixed(2), name: '其他停' },
-          { value: this.offLineNum.toFixed(2), name: '离线' }
-        ];
-        if (this.machineList.length>10){
-          this.barData={"name":[],"value":[]}
-          for(let i=0;i<7;i++){
-            this.barData.name.push(this.machineList[i].maccode);
-            this.barData.value.push(this.machineList[i].macspeed);
-          }
+  watch: {
+    avgEfficiencyList: {
+      deep: true,
+      handler(val) {
+        var avg = 0;
+        for(let i = 0; i<val.length;i++){
+          avg = avg + val[i];
         }
-      });
-    });
+        this.avgEfficiency = avg/val.length;
+      }
+    },
+  },
+  created(){
+    //列出所有织机  定时执行轮旬进行 不断的查询织机状态
+    this.updateStatus();
     //列出最近的生产情况
     listShiftRecent(7).then(response=>{
       if (response.msg=="操作成功"){
@@ -155,18 +115,21 @@ export default {
       if (response.rows.length>0){
         var shiftInfo = this.calcShift(response.rows);
         this.allWeavingLength =shiftInfo.allLength;
+        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
       }
     });
     // 列出前一班
     listShift({shiftnow:"-1"}).then(response=>{
       if (response.rows.length>0){
-        this.calcShift(response.rows);
+        var shiftInfo = this.calcShift(response.rows);
+        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
       }
     });
     // 列出再前一班
     listShift({shiftnow:"-2"}).then(response=>{
       if (response.rows.length>0){
-        this.calcShift(response.rows);
+        var shiftInfo = this.calcShift(response.rows);
+        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
       }
     });
 
@@ -182,10 +145,82 @@ export default {
       this.allColumn = Number(response.data[1].dictValue);
     });
   },
-
+  mounted(){
+    this.timer = setInterval(this.updateStatus, 60000);//
+  },
+  beforeDestroy() {
+    clearTimeout(this.timer);
+  },
   methods: {
     handleSetLineChartData(type) {
       this.showtype = type;
+    },
+    updateStatus(){
+      listMachine({"sortProp":"macspeed","sortOrder":"desc"}).then(response => {
+        console.log(1)
+        this.machineList = response.rows;
+        //计算平均车速
+        this.avgSpeed = 0;
+        //this.avgEfficiency = 0;
+        this.stopMacNum=0,
+          this.weftStopNum=0,
+          this.warpStopNum=0,
+          this.otherStopNum=0,
+          this.offLineNum=0,
+          this.runMacNum=0,
+          this.allWeavingLength = 0;
+        this.getDicts("mac_common_status").then(response => {
+          this.mac_common_status=response.data;
+          // 获取状态对应value
+          this.mac_common_status.forEach((status, index, array) =>{
+            this.macStatusMap.set(status.dictLabel,status.dictValue);
+          })
+          // 统计数据
+          let num = 0
+          this.machineList.forEach((machine, index, array) =>{
+            if (machine.macspeed!=0){
+              this.avgSpeed = this.avgSpeed + machine.macspeed;
+            }
+            //this.avgEfficiency = this.avgEfficiency + machine.macefficiency;
+            if (machine.macstatus ==  this.macStatusMap.get("运转") ) {
+              num = num +1;
+              this.runMacNum = this.runMacNum + 1;
+            }else if (machine.macstatus == this.macStatusMap.get("离线") ) {
+              this.offLineNum = this.offLineNum + 1;
+            }else if (machine.macstatus == this.macStatusMap.get("经停") ) {
+              this.warpStopNum = this.warpStopNum + 1;
+              this.stopMacNum = this.stopMacNum + 1;
+            }else if (machine.macstatus == this.macStatusMap.get("纬停") ) {
+              this.weftStopNum = this.weftStopNum + 1;
+              this.stopMacNum = this.stopMacNum + 1;
+            }else if (machine.macstatus == this.macStatusMap.get("其他停") ) {
+              this.otherStopNum = this.otherStopNum + 1;
+              this.stopMacNum = this.stopMacNum + 1;
+            }
+          })
+          //this.avgEfficiency = this.avgEfficiency/this.machineList.length;
+          console.log(num)
+          if(num!=0){
+            this.avgSpeed = this.avgSpeed/num;
+          }else{
+            this.avgSpeed = 0;
+          }
+          this.pieData = [
+            { value: this.runMacNum, name: '运转' },
+            { value: this.warpStopNum, name: '经停' },
+            { value: this.weftStopNum, name: '纬停' },
+            { value: this.otherStopNum, name: '其他停' },
+            { value: this.offLineNum, name: '离线' }
+          ];
+          if (this.machineList.length>10){
+            this.barData={"name":[],"value":[]}
+            for(let i=0;i<7;i++){
+              this.barData.name.push(this.machineList[i].maccode);
+              this.barData.value.push(this.machineList[i].macspeed);
+            }
+          }
+        });
+      });
     },
     calcShift(shiftList){
       var avgSpeed = 0;
@@ -210,7 +245,7 @@ export default {
       avgStopNum = avgStopNum/allNum;
       var raddarObject = {"name":shiftList[0].shifttype,"value":[avgSpeed.toFixed(2),avgEffiency.toFixed(2),allLength.toFixed(2),avgRuntime.toFixed(2),avgStoptime.toFixed(2),avgStopNum.toFixed(2)]}
       this.raddarData.push(raddarObject)
-      return {"avgSpeed":avgSpeed.toFixed(2),"avgEffiency":avgEffiency.toFixed(2),"allLength":allLength,"avgRuntime":avgRuntime.toFixed(2),"avgStoptime":avgStoptime.toFixed(2),"avgStopNum":avgStopNum.toFixed(2)};
+      return {"avgSpeed":avgSpeed.toFixed(2),"avgEfficiency":avgEffiency,"allLength":allLength,"avgRuntime":avgRuntime.toFixed(2),"avgStoptime":avgStoptime.toFixed(2),"avgStopNum":avgStopNum.toFixed(2)};
     },
     // 柱状图内容的更新
     changeBarSearch(type){

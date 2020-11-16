@@ -2,17 +2,21 @@ package com.mscode.project.manufacture.service.impl;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import com.mscode.common.utils.DateUtils;
+import com.mscode.project.manufacture.domain.MacMachine;
+import com.mscode.project.manufacture.mapper.MacMachineMapper;
 import com.mscode.project.system.domain.SysDictData;
 import com.mscode.project.system.mapper.SysDictDataMapper;
-import com.mscode.project.system.mapper.SysDictTypeMapper;
+import org.apache.velocity.runtime.directive.Foreach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.mscode.project.manufacture.mapper.MftShiftMapper;
 import com.mscode.project.manufacture.domain.MftShift;
 import com.mscode.project.manufacture.service.IMftShiftService;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 /**
  * 班次效率Service业务层处理
@@ -25,6 +29,8 @@ public class MftShiftServiceImpl implements IMftShiftService
 {
     @Autowired
     private MftShiftMapper mftShiftMapper;
+    @Autowired
+    private MacMachineMapper  macMachineMapper;
     @Autowired
     private SysDictDataMapper dictDataMapper;
     /**
@@ -106,6 +112,9 @@ public class MftShiftServiceImpl implements IMftShiftService
         MftShift mftShift = new MftShift();
         mftShift.setBeginTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, startDate));
         List<MftShift> mftShifts = mftShiftMapper.selectMftShiftList(mftShift);
+        if (mftShifts.size()==0){
+            return null;
+        }
         // 获取班次数据字典
         List<SysDictData> mac_common_shift = dictDataMapper.selectDictDataByType("mac_common_shift");
         Map<String,Map> allMap = new HashMap<>();
@@ -136,10 +145,10 @@ public class MftShiftServiceImpl implements IMftShiftService
                 DoubleSummaryStatistics stats4 = mftShifts.stream().filter(mftShift1 -> (mftShift1.getShifttype().equals(sysDictData.getDictLabel()) && DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, mftShift1.getShiftdate()).equals(startDateString))).mapToDouble((mftShift1) -> {
                     return mftShift1.getRuntime().doubleValue();
                 }).summaryStatistics();
-                lengthArray[i] = stats.getSum();
-                speedArray[i] = stats2.getAverage();
-                efficiencyArray[i] = stats3.getAverage();
-                runtimeArray[i] = stats4.getAverage();
+                lengthArray[i] = Math.round(stats.getSum());
+                speedArray[i] = Math.round(stats2.getAverage());
+                efficiencyArray[i] = new BigDecimal(stats3.getAverage()).setScale(0, BigDecimal.ROUND_HALF_UP).doubleValue();
+                runtimeArray[i] = Math.round(stats4.getAverage());
                 dateList[i] = startDateString;
             }
             lengthMap.put(sysDictData.getDictLabel(), lengthArray);
@@ -173,5 +182,88 @@ public class MftShiftServiceImpl implements IMftShiftService
         allMap.put("效率统计", efficiencyMap);
         allMap.put("运行统计", runtimeMap);
         return allMap;
+    }
+
+    /**
+     * 判断是否要生成手动执行生成新的班次 如果已经生成了就不创建，
+     * 找到当前班次，shiftNow设为1以及更新时刻
+     *
+     * @param shiftType
+     */
+    @Override
+    public void checkNow(String shiftType, Long shiftNow,Date shiftDate) throws Exception {
+        List<SysDictData> mac_common_shift = dictDataMapper.selectDictDataByType("mac_common_shift");
+        // 大于两班开始处理 计算对应的准确时刻下有没有数据
+        // 获取对应班次的准确起止时间
+        int flag = 0;
+        for (int i=0; i<mac_common_shift.size();i++) {
+            if (shiftType.equals(mac_common_shift.get(i).getDictLabel())){
+                flag = i;
+            }
+        }
+        Date shiftStartTime = null;
+        Date shiftEndTime = null;
+        // 第一个就是  按顺序来的 没有隔天
+        String dictValue_start = mac_common_shift.get(flag).getDictValue();
+        String shiftDateStr = DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, shiftDate);
+        shiftStartTime = DateUtils.parseDate(shiftDateStr+" "+dictValue_start,DateUtils.YYYY_MM_DD_HH_MM_SS);
+        Date endDate = DateUtils.addDays(shiftDate, 1);
+        String shiftDateStr2 = DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, endDate);
+        if (flag==0){
+            String dictValue_end = mac_common_shift.get(flag+1).getDictValue();
+            shiftEndTime = DateUtils.parseDate(shiftDateStr+" "+dictValue_end,DateUtils.YYYY_MM_DD_HH_MM_SS);
+        }else if (flag==1){
+            // 如果两班隔天 否则不隔天
+            // 分情况
+            if (mac_common_shift.size()==2){
+                String dictValue_end = mac_common_shift.get(0).getDictValue();
+                shiftEndTime = DateUtils.parseDate(shiftDateStr2+" "+dictValue_end,DateUtils.YYYY_MM_DD_HH_MM_SS);
+            }else if (mac_common_shift.size()==3){
+                String dictValue_end = mac_common_shift.get(flag+1).getDictValue();
+                shiftEndTime = DateUtils.parseDate(shiftDateStr+" "+dictValue_end,DateUtils.YYYY_MM_DD_HH_MM_SS);
+            }
+        }if (flag==2){//必定三班
+            String dictValue_end = mac_common_shift.get(0).getDictValue();
+            shiftEndTime = DateUtils.parseDate(shiftDateStr2+" "+dictValue_end,DateUtils.YYYY_MM_DD_HH_MM_SS);
+        }
+
+
+        // 生成班次
+        MftShift mftShift = new MftShift();
+        mftShift.setShifttype(shiftType);
+        mftShift.setShiftdate(DateUtils.parseDate(shiftDateStr,DateUtils.YYYY_MM_DD));
+        List<MftShift> mftShifts = mftShiftMapper.selectMftShiftList(mftShift);
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("shiftEndTime", shiftEndTime);
+        params.put("shiftStartTime", shiftStartTime);
+        params.put("shiftDate", shiftDateStr);
+        params.put("shiftType", shiftType);
+        params.put("shiftNow", shiftNow);
+        mftShift.setParams(params);
+
+        if (shiftNow == 1L){
+            // 这个班次有数据  只需把这个班次设为当前班次  这个班次必定是sql定时生成的未来的任务
+            if (mftShifts.size()>0 && mftShifts.get(0).getShiftnow()==2L){
+                for (MftShift shift : mftShifts) {
+                    shift.setShiftnow(shiftNow);//当前班次
+                    shift.setUpdatetime(new Date());
+                    mftShiftMapper.updateMftShift(shift);
+                }
+            }else{// 没有数据就 生成这个班次数据 利用mysql存储过程  必定要生成的
+                mftShiftMapper.createShift(mftShift);
+                //检查当前是否有当前时刻班次了 刚好是152台  如果没有 或数据不对 就 重新生成
+                MftShift mfttest = new MftShift();
+                mfttest.setShiftnow(1L);
+                List<MftShift> mftShifts1 = mftShiftMapper.selectMftShiftList(mfttest);
+                if (mftShifts1.size()!= macMachineMapper.selectMacMachineList(new MacMachine()).size()){
+                    for (MftShift shift : mftShifts1) {
+                        mftShiftMapper.deleteMftShiftById(shift.getId());//没有就全部删掉
+                    }
+                    mftShiftMapper.createShift(mftShift);
+                }
+            }
+        }else{ // 这个是更新任意班次 会自动判断是否要更新还是新建
+            mftShiftMapper.updateShiftAny(mftShift);
+        }
     }
 }

@@ -170,7 +170,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shiftnow != null">shiftNow = #{shiftnow},</if>
             <if test="updatetime != null">updateTime = #{updatetime},</if>
             <if test="remark != null">remark = #{remark},</if>
-            <if test="middleno != null">remark = #{middleno},</if>
+            <if test="middleno != null">middleno = #{middleno},</if>
             <if test="stationno != null">stationno = #{stationno},</if>
         </trim>
         where id = #{id}
@@ -186,5 +186,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
-    
+
+
+    <select id="createShift" parameterType="MftShift" statementType="CALLABLE">
+
+        <![CDATA[
+        call createShift(
+                #{params.shiftStartTime,jdbcType=DATETIMEOFFSET},
+                #{params.shiftEndTime,jdbcType=DATETIMEOFFSET},
+                #{params.shiftDate,jdbcType=DATE},
+                #{params.shiftType,jdbcType=VARCHAR},
+                #{params.shiftNow,jdbcType=INTEGER});
+                /*${params.shiftStartTime},
+                ${params.shiftEndTime},
+                ${params.shiftDate},
+                ${params.shiftType},
+                ${params.shiftNow});*/
+        ]]>
+    </select>
+
+    <select id="updateShiftAny" parameterType="MftShift" statementType="CALLABLE">
+
+        <![CDATA[
+        call updateShiftAny(
+                #{params.shiftStartTime,jdbcType=DATETIMEOFFSET},
+                #{params.shiftEndTime,jdbcType=DATETIMEOFFSET},
+                #{params.shiftDate,jdbcType=DATE},
+                #{params.shiftType,jdbcType=VARCHAR},
+                #{params.shiftNow,jdbcType=INTEGER});
+        ]]>
+    </select>
+
 </mapper>

@@ -8,7 +8,14 @@ export function listShift(query) {
     params: query
   })
 }
-
+// 更新任意日期的班次
+export function updateShiftAny(query) {
+  return request({
+    url: '/manufacture/shift/updateShiftAny',
+    method: 'get',
+    params: query
+  })
+}
 // 查询班次最近几天的数据统计
 export function listShiftRecent(days) {
   return request({

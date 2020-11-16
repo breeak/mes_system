@@ -21,7 +21,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            班次平均效率(%)
+            当天平均效率(%)
           </div>
           <count-to :start-val="0" :end-val="avgEfficiency" :decimals="2" :duration="2000" class="card-panel-num" />
         </div>

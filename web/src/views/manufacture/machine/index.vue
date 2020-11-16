@@ -148,7 +148,11 @@
         </template>
       </el-table-column>
       <el-table-column label="品种编号" align="center" prop="pdtcode" />
-      <el-table-column label="纬密根/10cm"  width="100" align="center" prop="weftdensity" />
+      <el-table-column label="纬密根/英寸" align="center" prop="weftdensity">
+        <template slot-scope="scope">
+          <span>{{(scope.row.weftdensity*0.254).toFixed(2)}}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="上机卡号" align="center" prop="shaftcode" />
       <!--<el-table-column label="订单编号" align="center" prop="ordercode" />-->
       <el-table-column sortable='custom' label="更新时间" align="center" prop="updatetime" width="180">

@@ -90,6 +90,15 @@ export default {
         },
         tooltip: {
           trigger: 'axis',
+          formatter: function (params) {
+            var tip = "<b>"+ showtype+"</b>&nbsp;&nbsp;&nbsp;"+params[0].name+"&nbsp;<br/>" ;
+            for (var i = 0; i < params.length; i++) {
+              if (params[i].value != 0) {
+                tip = tip + params[i].marker + params[i].seriesName+"："+ + params[i].value + '<br/>';
+              }
+            }
+            return tip;
+          },
           axisPointer: {
             type: 'cross'
           },

@@ -41,6 +41,10 @@ public class MftShaft extends BaseEntity
     @Excel(name = "品种纬密")
     private BigDecimal pdtweftdensity;
 
+    /** 经缩率 */
+    @Excel(name = "经缩率")
+    private BigDecimal pdtshrinkage;
+
     /** 订单编号 */
     @Excel(name = "订单编号")
     private String ordercode;
@@ -70,23 +74,23 @@ public class MftShaft extends BaseEntity
     private String weftbacth;
 
     /** 计划上机时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "计划上机时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "计划上机时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date planstart;
 
     /** 计划下机时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "计划下机时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "计划下机时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date planend;
 
     /** 实际上机时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "实际上机时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "实际上机时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date actstart;
 
     /** 实际下机时间 */
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "实际下机时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "实际下机时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date actend;
 
     /** 计划上机机台编号 */
@@ -295,7 +299,13 @@ public class MftShaft extends BaseEntity
     {
         return actmaccode;
     }
+    public BigDecimal getPdtshrinkage() {
+        return pdtshrinkage;
+    }
 
+    public void setPdtshrinkage(BigDecimal pdtshrinkage) {
+        this.pdtshrinkage = pdtshrinkage;
+    }
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -305,6 +315,7 @@ public class MftShaft extends BaseEntity
             .append("shaftlength", getShaftlength())
             .append("pdtcode", getPdtcode())
             .append("pdtweftdensity", getPdtweftdensity())
+            .append("pdtshrinkage", getPdtshrinkage())
             .append("ordercode", getOrdercode())
             .append("shaftstatus", getShaftstatus())
             .append("shaftremainlength", getShaftremainlength())

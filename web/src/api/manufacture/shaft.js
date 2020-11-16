@@ -43,7 +43,14 @@ export function doShangZhou(data) {
     data: data
   })
 }
-
+// 织轴上轴
+export function doShangZhouAll(data) {
+  return request({
+    url: '/manufacture/shaft/doShangZhouAll',
+    method: 'put',
+    data: data
+  })
+}
 // 删除织轴列表
 export function delShaft(id) {
   return request({

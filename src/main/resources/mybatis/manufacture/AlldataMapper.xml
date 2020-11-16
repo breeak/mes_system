@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.manufacture.mapper.AlldataMapper">
+    
+    <resultMap type="Alldata" id="AlldataResult">
+        <result property="id"    column="id"    />
+        <result property="middleno"    column="middleno"    />
+        <result property="stationno"    column="stationno"    />
+        <result property="starttime"    column="starttime"    />
+        <result property="startdate"    column="startdate"    />
+        <result property="endtime"    column="endtime"    />
+        <result property="enddate"    column="enddate"    />
+        <result property="dusec"    column="dusec"    />
+        <result property="state"    column="state"    />
+        <result property="output"    column="output"    />
+    </resultMap>
+
+    <sql id="selectAlldataVo">
+        select id, middleno, stationno, starttime, startdate, endtime, enddate, dusec, state, output from alldata
+    </sql>
+
+    <select id="selectAlldataList" parameterType="Alldata" resultMap="AlldataResult">
+        <include refid="selectAlldataVo"/>
+        <where>  
+            <if test="middleno != null  and middleno != ''"> and middleno = #{middleno}</if>
+            <if test="stationno != null "> and stationno = #{stationno}</if>
+            <if test="starttime != null "> and starttime = #{starttime}</if>
+            <if test="startdate != null "> and startdate = #{startdate}</if>
+            <if test="endtime != null "> and endtime = #{endtime}</if>
+            <if test="enddate != null "> and enddate = #{enddate}</if>
+            <if test="dusec != null "> and dusec = #{dusec}</if>
+            <if test="state != null "> and state = #{state}</if>
+            <if test="output != null "> and output = #{output}</if>
+            <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and endtime &gt;= #{params.beginTime} and starttime &lt;= #{params.endTime}</if>
+        </where>
+        order by
+        <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">
+            ${params.sortProp} ${params.sortOrder},
+        </if>
+        endtime desc
+
+    </select>
+    
+    <select id="selectAlldataById" parameterType="Long" resultMap="AlldataResult">
+        <include refid="selectAlldataVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertAlldata" parameterType="Alldata" useGeneratedKeys="true" keyProperty="id">
+        insert into alldata
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="middleno != null and middleno != ''">middleno,</if>
+            <if test="stationno != null">stationno,</if>
+            <if test="starttime != null">starttime,</if>
+            <if test="startdate != null">startdate,</if>
+            <if test="endtime != null">endtime,</if>
+            <if test="enddate != null">enddate,</if>
+            <if test="dusec != null">dusec,</if>
+            <if test="state != null">state,</if>
+            <if test="output != null">output,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="middleno != null and middleno != ''">#{middleno},</if>
+            <if test="stationno != null">#{stationno},</if>
+            <if test="starttime != null">#{starttime},</if>
+            <if test="startdate != null">#{startdate},</if>
+            <if test="endtime != null">#{endtime},</if>
+            <if test="enddate != null">#{enddate},</if>
+            <if test="dusec != null">#{dusec},</if>
+            <if test="state != null">#{state},</if>
+            <if test="output != null">#{output},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAlldata" parameterType="Alldata">
+        update alldata
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="middleno != null and middleno != ''">middleno = #{middleno},</if>
+            <if test="stationno != null">stationno = #{stationno},</if>
+            <if test="starttime != null">starttime = #{starttime},</if>
+            <if test="startdate != null">startdate = #{startdate},</if>
+            <if test="endtime != null">endtime = #{endtime},</if>
+            <if test="enddate != null">enddate = #{enddate},</if>
+            <if test="dusec != null">dusec = #{dusec},</if>
+            <if test="state != null">state = #{state},</if>
+            <if test="output != null">output = #{output},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAlldataById" parameterType="Long">
+        delete from alldata where id = #{id}
+    </delete>
+
+    <delete id="deleteAlldataByIds" parameterType="String">
+        delete from alldata where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -86,10 +86,10 @@ export default {
           indicator: [
             { name: '平均车速', max: 1000 },
             { name: '平均效率', max: 100 },
-            { name: '班次产量', max: 100000 },
-            { name: '运转时长', max: 10000 },
-            { name: '停台时长', max: 10000 },
-            { name: '停台次数', max: 100 }
+            { name: '班次产量', max: 10000 },
+            { name: '运转时长', max: 28800 },
+            { name: '停台时长', max: 28800 },
+            { name: '停台次数', max: 50 }
           ]
         },
         legend: {

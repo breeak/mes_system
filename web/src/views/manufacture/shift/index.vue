@@ -80,6 +80,15 @@
       </el-col>-->
       <el-col :span="1.5">
         <el-button
+          type="danger"
+          icon="el-icon-s-check"
+          size="mini"
+          @click="handleUpdateAny"
+          v-hasPermi="['manufacture:shift:add']"
+        >更新班次</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button
           type="warning"
           icon="el-icon-download"
           size="mini"
@@ -94,6 +103,16 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column fixed sortable='custom' width="100" label="织机编号" align="center" prop="maccode" />
       <el-table-column fixed label="班次类别" align="center" prop="shifttype" :formatter="shifttypeFormat" />
+      <el-table-column fixed sortable='custom'  label="开始时间" align="center" prop="shiftstarttime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.shiftstarttime,"{y}-{m}-{d} {h}:{i}:{s}") }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column fixed sortable='custom'  label="结束时间" align="center" prop="shiftendtime" width="180">
+        <template slot-scope="scope">
+          <span>{{ parseTime(scope.row.shiftendtime),"{y}-{m}-{d} {h}:{i}:{s}" }}</span>
+        </template>
+      </el-table-column>
       <el-table-column fixed label="品种列表" align="center" prop="pdtcodes" />
       <el-table-column fixed label="织轴列表" align="center" prop="shaftcodes" />
       <el-table-column sortable='custom' width="100" label="平均速度" align="center" prop="macspeed" />
@@ -121,16 +140,7 @@
         </template>
       </el-table-column>-->
 
-      <el-table-column sortable='custom'  label="开始时间" align="center" prop="shiftstarttime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.shiftstarttime) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column sortable='custom'  label="结束时间" align="center" prop="shiftendtime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.shiftendtime) }}</span>
-        </template>
-      </el-table-column>
+
       <!--<el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -215,9 +225,9 @@
         <el-form-item label="纬停时长s" prop="weftstoptime">
           <el-input v-model="form.weftstoptime" placeholder="请输入纬停时长s" />
         </el-form-item>
-        <el-form-item label="离线时长s" prop="offlinetime">
-          <el-input v-model="form.offlinetime" placeholder="请输入离线时长s" />
-        </el-form-item>
+        <!--<el-form-item label="离线时长s" prop="offlinetime">-->
+          <!--<el-input v-model="form.offlinetime" placeholder="请输入离线时长s" />-->
+        <!--</el-form-item>-->
         <el-form-item label="其他停时长s" prop="otherstoptime">
           <el-input v-model="form.otherstoptime" placeholder="请输入其他停时长s" />
         </el-form-item>
@@ -263,7 +273,7 @@
 </template>
 
 <script>
-import { listShift, getShift, delShift, addShift, updateShift, exportShift } from "@/api/manufacture/shift";
+import { listShift, getShift, delShift, addShift, updateShift,updateShiftAny, exportShift } from "@/api/manufacture/shift";
 
 export default {
   name: "Shift",
@@ -547,6 +557,29 @@ export default {
           return exportShift(queryParams);
         }).then(response => {
           this.download(response.msg);
+        }).catch(function() {});
+    },
+    /** 更新任意班次 */
+    handleUpdateAny() {
+      const queryParams = this.queryParams;
+      if ((this.queryParams.shiftdate==null)||(this.queryParams.shifttype==null)){
+        this.$message("请先输入班次及日期！");
+        return;
+      }
+      var dateTime=new Date().setDate(new Date().getDate()-1);
+      dateTime=new Date(dateTime);
+      if ((new Date(this.formatDate(this.queryParams.shiftdate)).getTime()>=dateTime.getTime())){
+        this.$message("请输入之前的班次日期，当天的班次还未更新！");
+        return;
+      }
+      this.$confirm('是否确认要更新['+this.queryParams.shiftdate+this.queryParams.shifttype+']班次效率数据项?', "警告", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }).then(function() {
+          return updateShiftAny(queryParams);
+        }).then(response => {
+          this.getList();
         }).catch(function() {});
     }
   }

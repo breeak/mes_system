@@ -39,7 +39,7 @@ BEGIN
 
     Set _shaftRemainLength = _shaftLength - _clothLength;
 
-    Set _planTime = _during/_clothLength;
+    Set _planTime = (_during*_shaftLength)/_clothLength;
 
     Set _planEnd = from_unixtime(unix_timestamp(_actStart) + _planTime);
 

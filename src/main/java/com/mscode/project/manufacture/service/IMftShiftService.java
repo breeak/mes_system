@@ -1,5 +1,6 @@
 package com.mscode.project.manufacture.service;
 
+import java.util.Date;
 import java.util.List;
 import com.mscode.project.manufacture.domain.MftShift;
 
@@ -65,4 +66,7 @@ public interface IMftShiftService
      * @return
      */
     Object listRecentDays(Integer days);
+
+    void checkNow(String shiftType, Long shiftNow, Date shiftDate) throws Exception;
+
 }

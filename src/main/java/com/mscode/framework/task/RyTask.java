@@ -54,7 +54,7 @@ public class RyTask
     }
 
 
-    public void generateShift(String shiftType)
+    public void generateShift(String shiftType) throws Exception
     {
         //倒数第三班去掉
         MftShift mftShift1 = new MftShift();
@@ -76,12 +76,22 @@ public class RyTask
         }
 
 
-        // 把旧的当前班次给设为倒数第一班
+        // 把旧的当前班次给设为倒数第一班  同时更新一下那时的班次
         mftShift1 = new MftShift();
         mftShift1.setShiftnow(1L);
         mftShifts = mftShiftService.selectMftShiftList(mftShift1);
-        for (MftShift mftShift : mftShifts) {
+        long macListsize = macMachineService.selectMacMachineList(new MacMachine()).size();
+        if (mftShifts.size()==macListsize){// 当前的班次数 必定等于生成的织机数
+            mftShiftService.checkNow(mftShifts.get(0).getShifttype(),-1L,mftShifts.get(0).getShiftdate());
+        }else if(mftShifts.size()>macListsize||mftShifts.size()<macListsize){// 当前的班次数 大于或小于生成的织机数  说明出错了 当前有两个班次或以上全部都删掉，然后不管了，如果看到少了用户可以自定义生成
+            for (MftShift mftShift : mftShifts) {
+                mftShiftService.deleteMftShiftById(mftShift.getId());
+            }
+        }
+        /*for (MftShift mftShift : mftShifts) {
             mftShift.setShiftnow(-1L); //设为不是当前班次了
+
+
             mftShift.setShiftendtime(new Date()); // 结束设为当前时间
             MacMachine macMachine = new MacMachine();
             macMachine.setMaccode(mftShift.getMaccode());
@@ -111,11 +121,20 @@ public class RyTask
                 }
             }
             mftShift.setUpdatetime(new Date());
-            mftShiftService.updateMftShift(mftShift);//更新数据
+            mftShiftService.updateMftShift(mftShift);//更新数据 TODO 更新任意时刻班次的数据
+        }*/
+
+        //判断是否要生成新的班次 如果已经生成了就不创建，只是找到当前班次，shiftNow设为1以及更新时刻
+        try {
+            mftShiftService.checkNow(shiftType,1L,new Date());//new Date 应该就是当前时刻 没问题的
+        }catch (Exception e){
+            System.out.println("更新失败:"+ e.toString());
         }
 
-        //生成新的班次
-        List<MacMachine> macMachines = macMachineService.selectMacMachineList(new MacMachine());
+
+
+        // 未生成就 生成一个当前班次
+        /*List<MacMachine> macMachines = macMachineService.selectMacMachineList(new MacMachine());
         for (MacMachine macMachine : macMachines) {
             MftShift mftShift = new MftShift();
             mftShift.setMaccode(macMachine.getMaccode());
@@ -131,7 +150,7 @@ public class RyTask
             mftShift.setShiftnow(1L);//当前班次
             mftShift.setUpdatetime(new Date());
             mftShiftService.insertMftShift(mftShift);
-        }
+        }*/
         System.out.println("更新班次一次");
     }
 

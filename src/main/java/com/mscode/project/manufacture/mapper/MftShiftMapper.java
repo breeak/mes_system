@@ -58,4 +58,8 @@ public interface MftShiftMapper
      * @return 结果
      */
     public int deleteMftShiftByIds(Long[] ids);
+
+    void createShift(MftShift mftShift);
+
+    void updateShiftAny(MftShift mftShift);
 }
