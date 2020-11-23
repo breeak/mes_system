@@ -1,7 +1,10 @@
 package com.mscode.project.manufacture.service;
 
+import java.util.Date;
 import java.util.List;
 import com.mscode.project.manufacture.domain.Alldata;
+import com.mscode.project.manufacture.domain.MftShaft;
+import com.mscode.project.manufacture.domain.MftShift;
 
 /**
  * 基础数据Service接口
@@ -58,4 +61,6 @@ public interface IAlldataService
      * @return 结果
      */
     public int deleteAlldataById(Long id);
+
+    MftShift getShift(String macCode, Date beginTime, Date endTime, MftShaft mftShaft);
 }

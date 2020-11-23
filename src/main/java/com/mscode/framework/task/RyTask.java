@@ -4,6 +4,7 @@ import com.mscode.common.constant.ScheduleConstants;
 import com.mscode.common.utils.DateUtils;
 import com.mscode.project.manufacture.domain.MacMachine;
 import com.mscode.project.manufacture.domain.MftShift;
+import com.mscode.project.manufacture.service.IAlldataService;
 import com.mscode.project.manufacture.service.IMacMachineService;
 import com.mscode.project.manufacture.service.IMftShiftService;
 import com.mscode.project.monitor.domain.SysJob;
@@ -38,6 +39,9 @@ public class RyTask
     @Autowired
     private ISysJobService jobService;
 
+    @Autowired
+    private IAlldataService alldataService;
+
     public void ryMultipleParams(String s, Boolean b, Long l, Double d, Integer i)
     {
         System.out.println(StringUtils.format("执行多参方法： 字符串类型{}，布尔类型{}，长整型{}，浮点型{}，整形{}", s, b, l, d, i));
@@ -56,102 +60,78 @@ public class RyTask
 
     public void generateShift(String shiftType) throws Exception
     {
-        //倒数第三班去掉
+        //shiftNow, 只有 1当前 2未来 0已完成
+        //获取当前班次对应的时间点
+        Map<String, Object> startEnd = mftShiftService.getStartEnd(shiftType, new Date());
+        Date shiftStartTime = (Date) startEnd.get("shiftStartTime");
+        Date shiftEndTime = (Date) startEnd.get("shiftEndTime");
+        String shiftDate = (String)startEnd.get("shiftDate");
+        //获取旧的当前班次，把所有当前班次状态给闭合掉
         MftShift mftShift1 = new MftShift();
-        mftShift1.setShiftnow(-2L);
-        List<MftShift> mftShifts = mftShiftService.selectMftShiftList(mftShift1);
-        for (MftShift mftShift : mftShifts) {
-            mftShift.setShiftnow(0L); //设为不是当前班次了
-            mftShift.setUpdatetime(new Date());
-            mftShiftService.updateMftShift(mftShift);//更新数据
-        }
-        //倒数第二班设为倒数第三班
-        mftShift1 = new MftShift();
-        mftShift1.setShiftnow(-1L);
-        mftShifts = mftShiftService.selectMftShiftList(mftShift1);
-        for (MftShift mftShift : mftShifts) {
-            mftShift.setShiftnow(-2L); //设为不是当前班次了
-            mftShift.setUpdatetime(new Date());
-            mftShiftService.updateMftShift(mftShift);//更新数据
-        }
-
-
-        // 把旧的当前班次给设为倒数第一班  同时更新一下那时的班次
-        mftShift1 = new MftShift();
         mftShift1.setShiftnow(1L);
-        mftShifts = mftShiftService.selectMftShiftList(mftShift1);
-        long macListsize = macMachineService.selectMacMachineList(new MacMachine()).size();
-        if (mftShifts.size()==macListsize){// 当前的班次数 必定等于生成的织机数
-            mftShiftService.checkNow(mftShifts.get(0).getShifttype(),-1L,mftShifts.get(0).getShiftdate());
-        }else if(mftShifts.size()>macListsize||mftShifts.size()<macListsize){// 当前的班次数 大于或小于生成的织机数  说明出错了 当前有两个班次或以上全部都删掉，然后不管了，如果看到少了用户可以自定义生成
+        List<MftShift> mftShifts = mftShiftService.selectMftShiftList(mftShift1);
+        if (mftShifts.size()>0){//表示生成了当前班次 存在当前班次  计算相关数据并闭合掉
             for (MftShift mftShift : mftShifts) {
-                mftShiftService.deleteMftShiftById(mftShift.getId());
-            }
-        }
-        /*for (MftShift mftShift : mftShifts) {
-            mftShift.setShiftnow(-1L); //设为不是当前班次了
-
-
-            mftShift.setShiftendtime(new Date()); // 结束设为当前时间
-            MacMachine macMachine = new MacMachine();
-            macMachine.setMaccode(mftShift.getMaccode());
-            List<MacMachine> macMachines = macMachineService.selectMacMachineList(macMachine); // 查找班次对应的机台 应该只有1台 当前状态下
-            Long duringSecond = (new Date().getTime()-mftShift.getUpdatetime().getTime())/1000; // 这里是算的 班次到点了 还有数据没有传完 原因=》       //TODO 更新时间只有上传数据才更新 结束状态改变才更新
-            if (macMachines.size()==1){
-                Long macstatus = macMachines.get(0).getMacstatus();
-                if (macstatus==30){//运行
-                    mftShift.setRuntime(mftShift.getRuntime()+duringSecond);
-                    // 存储过程中要调整runTime，pickNum的计算 要与开始时间比较 如果 是切换班次的时间要分开 只需加上
-                    // 下一次更新 picknum 要拆分 runTime 只算一半
-                }else if(macstatus==15){//经停
-                    mftShift.setStoptime(mftShift.getStoptime()+duringSecond);
-                    mftShift.setWarpstoptime(mftShift.getWarpstoptime()+duringSecond);
-                }else if(macstatus==23){//纬停
-                    mftShift.setStoptime(mftShift.getStoptime()+duringSecond);
-                    mftShift.setWeftstoptime(mftShift.getWeftstoptime()+duringSecond);
-                }else if(macstatus==31){//其他停
-                    mftShift.setStoptime(mftShift.getStoptime()+duringSecond);
-                    mftShift.setOtherstoptime(mftShift.getOtherstoptime()+duringSecond);
-                }
-                //更新效率
-                if ((mftShift.getRuntime()+mftShift.getStoptime())>0){
-                    mftShift.setMacefficiency(new BigDecimal(mftShift.getRuntime().doubleValue()*100/(mftShift.getRuntime()+mftShift.getStoptime())).setScale(2, BigDecimal.ROUND_HALF_EVEN));
+                MftShift updateShift = alldataService.getShift(mftShift.getMaccode(), mftShift.getShiftstarttime(), mftShift.getShiftendtime(), null);//使用null 自动寻找合适的shaft
+                updateShift.setShifttype(mftShift.getShifttype());
+                updateShift.setStartlength(mftShift.getStartlength());
+                updateShift.setShiftdate(mftShift.getShiftdate());
+                updateShift.setShiftnow(0L); //过去的统一设为0
+                updateShift.setUpdatetime(new Date());
+                updateShift.setRemark("班次到点自动闭合");
+                updateShift.setId(mftShift.getId());
+                mftShiftService.updateMftShift(updateShift);
+                updateShift=mftShiftService.selectMftShiftById(mftShift.getId());
+                // 对于新的班次 查找有没有
+                MftShift shiftQuery = new MftShift();
+                shiftQuery.setShiftdate(DateUtils.parseDate(shiftDate,DateUtils.YYYY_MM_DD));
+                shiftQuery.setShifttype(shiftType);
+                shiftQuery.setMaccode(mftShift.getMaccode());
+                List<MftShift> mftShifts1 = mftShiftService.selectMftShiftList(shiftQuery);
+                if (mftShifts1.size()==1){
+                    mftShifts1.get(0).setShiftnow(1L);//设为当前班次
+                    mftShifts1.get(0).setStartlength(updateShift.getShiftlength().add(updateShift.getStartlength()));
+                    mftShifts1.get(0).setPdtcodes(updateShift.getPdtcodes());
+                    mftShifts1.get(0).setShaftcodes(updateShift.getShaftcodes());
+                    mftShifts1.get(0).setMiddleno(updateShift.getMiddleno());
+                    mftShifts1.get(0).setStationno(updateShift.getStationno());
+                    mftShifts1.get(0).setUpdatetime(new Date());
+                    mftShifts1.get(0).setRemark("前端当前班次更新");
+                    mftShiftService.updateMftShift(mftShifts1.get(0));
                 }else {
-                    mftShift.setMacefficiency(new BigDecimal(0));
+                    shiftQuery.setShiftnow(1L);//设为当前班次
+                    shiftQuery.setShiftstarttime(shiftStartTime);
+                    shiftQuery.setShiftendtime(shiftEndTime);
+                    shiftQuery.setStartlength(updateShift.getShiftlength().add(updateShift.getStartlength()));
+                    shiftQuery.setPdtcodes(updateShift.getPdtcodes());
+                    shiftQuery.setShaftcodes(updateShift.getShaftcodes());
+                    shiftQuery.setMiddleno(updateShift.getMiddleno());
+                    shiftQuery.setStationno(updateShift.getStationno());
+                    shiftQuery.setUpdatetime(new Date());
+                    shiftQuery.setRemark("前端当前班次新建");
+                    mftShiftService.insertMftShift(shiftQuery);
                 }
             }
-            mftShift.setUpdatetime(new Date());
-            mftShiftService.updateMftShift(mftShift);//更新数据 TODO 更新任意时刻班次的数据
-        }*/
-
-        //判断是否要生成新的班次 如果已经生成了就不创建，只是找到当前班次，shiftNow设为1以及更新时刻
-        try {
-            mftShiftService.checkNow(shiftType,1L,new Date());//new Date 应该就是当前时刻 没问题的
-        }catch (Exception e){
-            System.out.println("更新失败:"+ e.toString());
+        }else{//旧当前班次没有生成，不用管它，只生成新的当前班次即可
+            List<MacMachine> macMachines = macMachineService.selectMacMachineList(new MacMachine());
+            for (MacMachine macMachine : macMachines) {
+                MftShift mftShift = new MftShift();
+                mftShift.setMaccode(macMachine.getMaccode());
+                mftShift.setShifttype(shiftType);
+                mftShift.setShiftstarttime(shiftStartTime);
+                mftShift.setShiftendtime(shiftEndTime);
+                mftShift.setPdtcodes(macMachine.getPdtcode());
+                mftShift.setShaftcodes(macMachine.getShaftcode());
+                mftShift.setStartlength(macMachine.getWeavinglength());
+                mftShift.setShiftdate(DateUtils.parseDate(shiftDate,DateUtils.YYYY_MM_DD));
+                mftShift.setShiftnow(1L);//设为当前
+                mftShift.setUpdatetime(new Date());
+                mftShift.setRemark("前端直接生成当前班次");
+                mftShift.setMiddleno(macMachine.getMiddleno());
+                mftShift.setStationno(macMachine.getStationno());
+                mftShiftService.insertMftShift(mftShift);
+            }
         }
-
-
-
-        // 未生成就 生成一个当前班次
-        /*List<MacMachine> macMachines = macMachineService.selectMacMachineList(new MacMachine());
-        for (MacMachine macMachine : macMachines) {
-            MftShift mftShift = new MftShift();
-            mftShift.setMaccode(macMachine.getMaccode());
-            mftShift.setMiddleno(macMachine.getMiddleno());
-            mftShift.setStationno(macMachine.getStationno());
-            mftShift.setShifttype(shiftType);
-            mftShift.setShiftstarttime(new Date());
-            mftShift.setPdtcodes(macMachine.getPdtcode());
-            mftShift.setShaftcodes(macMachine.getShaftcode());
-            mftShift.setMacspeed(new BigDecimal(macMachine.getMacspeed()));
-            mftShift.setMacefficiency(new BigDecimal(100));//班次开始的默认效率都是100
-            mftShift.setShiftdate(new Date());
-            mftShift.setShiftnow(1L);//当前班次
-            mftShift.setUpdatetime(new Date());
-            mftShiftService.insertMftShift(mftShift);
-        }*/
-        System.out.println("更新班次一次");
     }
 
     //班次表任务开启

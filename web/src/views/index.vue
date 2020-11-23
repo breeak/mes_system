@@ -75,6 +75,8 @@ export default {
       otherStopNum:0,
       offLineNum:0,
       machineList:[],
+      allRow:0,
+      allColumn:0,
       shaftList:[],
       shiftList:{},
       mac_common_status:[],
@@ -84,8 +86,6 @@ export default {
       barData:{},
       barType:"macspeed",
       showtype:"速度统计",
-      allRow:0,
-      allColumn:0,
       lineData: {}
     }
   },

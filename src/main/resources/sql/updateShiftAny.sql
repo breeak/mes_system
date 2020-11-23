@@ -186,7 +186,8 @@ BEGIN
       -- 当s不等于1，也就是未遍历完时，会一直循环
       while s<>1 do
 
-      -- 执行相关织轴的更新
+      -- 执行相关织轴的更新  每有一个织轴便生成一个班次
+      --
       -- 上传数据落在前半部分 只取上传数据的后半 判断是否刚好在某个班次点 那么 dusec 要只算这半部分的
       if (_actStart <= UNIX_TIMESTAMP(_shiftStartTime) and ( (UNIX_TIMESTAMP(_shiftStartTime)<=_actEnd))or(_actEnd is null) ) then
         if (_actEnd >= _shiftEndTime ) then

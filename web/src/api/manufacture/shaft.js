@@ -38,7 +38,7 @@ export function updateShaft(data) {
 // 织轴上轴
 export function doShangZhou(data) {
   return request({
-    url: '/manufacture/shaft/doShangZhou',
+    url: '/manufacture/shaft/doShangZhouAll',
     method: 'put',
     data: data
   })

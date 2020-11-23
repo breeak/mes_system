@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.hr.mapper.HrWorkerMapper">
+    
+    <resultMap type="HrWorker" id="HrWorkerResult">
+        <result property="id"    column="id"    />
+        <result property="workername"    column="workerName"    />
+        <result property="workerno"    column="workerNo"    />
+        <result property="cardid"    column="cardId"    />
+        <result property="userid"    column="userId"    />
+        <result property="workergroup"    column="workerGroup"    />
+        <result property="workerrole"    column="workerRole"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectHrWorkerVo">
+        select id, workerName, workerNo, cardId, userId, workerGroup, workerRole, status, create_time, update_time, create_by, update_by, remark from hr_worker
+    </sql>
+
+    <select id="selectHrWorkerList" parameterType="HrWorker" resultMap="HrWorkerResult">
+        <include refid="selectHrWorkerVo"/>
+        <where>  
+            <if test="workername != null  and workername != ''"> and workerName like concat('%', #{workername}, '%')</if>
+            <if test="workerno != null  and workerno != ''"> and workerNo = #{workerno}</if>
+            <if test="cardid != null "> and cardId = #{cardid}</if>
+            <if test="userid != null "> and userId = #{userid}</if>
+            <if test="workergroup != null  and workergroup != ''"> and workerGroup = #{workergroup}</if>
+            <if test="workerrole != null  and workerrole != ''"> and workerRole = #{workerrole}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectHrWorkerById" parameterType="Long" resultMap="HrWorkerResult">
+        <include refid="selectHrWorkerVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertHrWorker" parameterType="HrWorker">
+        insert into hr_worker
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="workername != null and workername != ''">workerName,</if>
+            <if test="workerno != null">workerNo,</if>
+            <if test="cardid != null">cardId,</if>
+            <if test="userid != null">userId,</if>
+            <if test="workergroup != null">workerGroup,</if>
+            <if test="workerrole != null">workerRole,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="workername != null and workername != ''">#{workername},</if>
+            <if test="workerno != null">#{workerno},</if>
+            <if test="cardid != null">#{cardid},</if>
+            <if test="userid != null">#{userid},</if>
+            <if test="workergroup != null">#{workergroup},</if>
+            <if test="workerrole != null">#{workerrole},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHrWorker" parameterType="HrWorker">
+        update hr_worker
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="workername != null and workername != ''">workerName = #{workername},</if>
+            <if test="workerno != null">workerNo = #{workerno},</if>
+            <if test="cardid != null">cardId = #{cardid},</if>
+            <if test="userid != null">userId = #{userid},</if>
+            <if test="workergroup != null">workerGroup = #{workergroup},</if>
+            <if test="workerrole != null">workerRole = #{workerrole},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteHrWorkerById" parameterType="Long">
+        delete from hr_worker where id = #{id}
+    </delete>
+
+    <delete id="deleteHrWorkerByIds" parameterType="String">
+        delete from hr_worker where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.hr.mapper.HrMacWorkerMapper">
+    
+    <resultMap type="HrMacWorker" id="HrMacWorkerResult">
+        <result property="id"    column="id"    />
+        <result property="workerid"    column="workerId"    />
+        <result property="machineid"    column="machineId"    />
+        <result property="workername"    column="workerName"    />
+        <result property="maccode"    column="macCode"    />
+        <result property="status"    column="status"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+    </resultMap>
+
+    <sql id="selectHrMacWorkerVo">
+        select id, workerId, machineId, workerName, macCode, status, remark, create_time, create_by, update_time, update_by from hr_mac_worker
+    </sql>
+
+    <select id="selectHrMacWorkerList" parameterType="HrMacWorker" resultMap="HrMacWorkerResult">
+        <include refid="selectHrMacWorkerVo"/>
+        <where>  
+            <if test="workerid != null "> and workerId = #{workerid}</if>
+            <if test="machineid != null "> and machineId = #{machineid}</if>
+            <if test="workername != null  and workername != ''"> and workerName like concat('%', #{workername}, '%')</if>
+            <if test="maccode != null  and maccode != ''"> and macCode = #{maccode}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+        <if test="params.groupby != null  and params.groupby != ''"> group by ${params.groupby}</if>
+    </select>
+    
+    <select id="selectHrMacWorkerById" parameterType="Long" resultMap="HrMacWorkerResult">
+        <include refid="selectHrMacWorkerVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertHrMacWorker" parameterType="HrMacWorker" useGeneratedKeys="true" keyProperty="id">
+        insert into hr_mac_worker
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="workerid != null">workerId,</if>
+            <if test="machineid != null">machineId,</if>
+            <if test="workername != null">workerName,</if>
+            <if test="maccode != null">macCode,</if>
+            <if test="status != null">status,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="workerid != null">#{workerid},</if>
+            <if test="machineid != null">#{machineid},</if>
+            <if test="workername != null">#{workername},</if>
+            <if test="maccode != null">#{maccode},</if>
+            <if test="status != null">#{status},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHrMacWorker" parameterType="HrMacWorker">
+        update hr_mac_worker
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="workerid != null">workerId = #{workerid},</if>
+            <if test="machineid != null">machineId = #{machineid},</if>
+            <if test="workername != null">workerName = #{workername},</if>
+            <if test="maccode != null">macCode = #{maccode},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteHrMacWorkerById" parameterType="Long">
+        delete from hr_mac_worker where id = #{id}
+    </delete>
+
+    <delete id="deleteHrMacWorkerByIds" parameterType="String">
+        delete from hr_mac_worker where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

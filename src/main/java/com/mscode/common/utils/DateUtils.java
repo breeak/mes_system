@@ -25,6 +25,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
 
     public static String YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
 
+    public static Date MAX_DATE = new Date(1924358400000L); /*2030-12-25 最大日期 */
+
     private static SimpleDateFormat sdf = new SimpleDateFormat("ss mm HH dd MM ? yyyy");
 
     

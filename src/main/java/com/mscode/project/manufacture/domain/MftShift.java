@@ -105,6 +105,9 @@ public class MftShift extends BaseEntity
     @Excel(name = "班次产量")
     private BigDecimal shiftlength;
 
+    /** 织轴起始产量 */
+    @Excel(name = "织轴起始产量")
+    private BigDecimal startlength;
 
     private String middleno;
     private Long stationno;
@@ -364,6 +367,14 @@ public class MftShift extends BaseEntity
         return shiftnow;
     }
 
+    public BigDecimal getStartlength() {
+        return startlength;
+    }
+
+    public void setStartlength(BigDecimal startlength) {
+        this.startlength = startlength;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -389,6 +400,7 @@ public class MftShift extends BaseEntity
             .append("uploadnum", getUploadnum())
             .append("statuschangenum", getStatuschangenum())
             .append("shiftlength", getShiftlength())
+            .append("startlength", getStartlength())
             .append("shiftdate", getShiftdate())
             .append("shiftnow", getShiftnow())
             .append("updatetime", getUpdatetime())

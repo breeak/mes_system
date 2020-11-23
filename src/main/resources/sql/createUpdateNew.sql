@@ -99,10 +99,10 @@ BEGIN
     while s<>1 do
     -- 执行业务逻辑
     -- 查询当前实时情况
-    SELECT macCode, weftDensity, weavingLength,shaftCode into _macCode, _weftDensity, _weavingLength, _shaftCode  FROM mac_machine where id = _id;
+    SELECT macCode, weftDensity, shaftCode into _macCode, _weftDensity, _shaftCode  FROM mac_machine where id = _id;
 
-    SELECT   shiftStartTime
-             INTO   _shiftStartTime
+    SELECT   shiftStartTime,startLength
+             INTO   _shiftStartTime,_weavingLength
     FROM mft_shift
     WHERE shiftNow = 1 AND  macCode = _macCode;
 
@@ -132,7 +132,6 @@ BEGIN
       if (_state = 30) THEN
         SET _runTime = _runTime + _dusec;
         SET _shiftLength = _shiftLength + _output/(_weftDensity*10);
-        SET _weavingLength = _weavingLength + _output /(_weftDensity*10);
         SET _pickNum = _pickNum + _output;
       end if;
 
@@ -194,6 +193,9 @@ BEGIN
       SET _macStatus = 11;
       SET _offLineTime = unix_timestamp(now()) - unix_timestamp(_updateTime);
     end if;
+
+    -- 记录已织长度 根据最初长度 + 班次长度    最初长度 班次生成或更新时会记录
+    SET _weavingLength = _weavingLength + _shiftLength;
 
     -- 更新实时表
     UPDATE mac_machine set macSpeed= _macSpeed, macStatus = _macStatus, macEfficiency = _macEfficiency,weavingLength = _weavingLength, updateTime = _updateTime where middleno = _middleno and stationno=_stationno  ;  -- TODO  updateTime 要改

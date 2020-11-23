@@ -405,6 +405,32 @@ export default {
         }
       });
     };
+
+    var checkActstart = (rule, value, callback) => {
+      console.log(Date.parse(value));
+      if (!value) {
+        return callback(new Error('实际上机时间不能为空！'));
+      }
+      if (new Date().getTime()<=new Date(Date.parse(value)).getTime()){
+        return callback(new Error('实际上机时间不能大于当前时刻！'));
+      }
+      if (this.form.actmaccode!="" && this.form.actmaccode !=null){
+        var macCode = this.form.actmaccode;
+        console.log(macCode);
+        listShaft({'actmaccode':macCode,'shaftstatus':"已上轴"}).then(response => {
+          if (response.total>0){
+            if (response.rows[0].actStart.getTime()>= new Date(Date.parse(value)).getTime()){
+              callback(new Error('实际上机时间不能早于在织织轴的上机时间！'));
+            } else {
+              callback();
+            }
+          } else{
+            callback();
+          }
+        });
+      }
+    };
+    
     return {
       // 遮罩层
       loading: true,
@@ -529,7 +555,7 @@ export default {
         { required: true, message: "织轴编号不能为空", trigger: "blur" }
       ],
         actstart: [
-        { required: true, message: "上机时间不能为空", trigger: "blur" }
+        { required: true, validator: checkActstart, trigger: "blur" }
       ],
     },
       // 上轴表单全部校验
@@ -556,7 +582,7 @@ export default {
           { required: true, message: "织机编号不能为空", trigger: "blur" }
         ],
         actstart: [
-          { required: true, message: "上机时间不能为空", trigger: "blur" }
+          { required: true, validator: checkActstart, trigger: "blur" }
         ],
       }
     };

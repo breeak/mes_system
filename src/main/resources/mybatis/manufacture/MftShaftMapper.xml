@@ -57,6 +57,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="params.beginPlanEndTime != null and params.beginPlanEndTime != '' and params.endPlanEndTime != null and params.endPlanEndTime != ''"> and planend between #{params.beginPlanEndTime} and #{params.endPlanEndTime}</if>
             <if test="params.beginActStartTime != null and params.beginActStartTime != '' and params.endActStartTime != null and params.endActStartTime != ''"> and actend between #{params.beginActStartTime} and #{params.endActStartTime}</if>
             <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and createTime between #{params.beginTime} and #{params.endTime}</if>
+            <if test="params.shiftStartTime != null and params.shiftEndTime != null"> and actStart &gt; #{params.shiftStartTime} and (actEnd &lt; #{params.shiftEndTime} or actEnd is null) </if>
         </where>
         order by
         <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">

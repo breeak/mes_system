@@ -27,6 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="uploadnum"    column="uploadNum"    />
         <result property="statuschangenum"    column="statusChangeNum"    />
         <result property="shiftlength"    column="shiftLength"    />
+        <result property="startlength"    column="startlength"    />
         <result property="shiftdate"    column="shiftDate"    />
         <result property="shiftnow"    column="shiftNow"    />
         <result property="updatetime"    column="updateTime"    />
@@ -36,7 +37,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectMftShiftVo">
-        select id, macCode, shiftType, shiftStartTime, shiftEndTime, pdtCodes, shaftCodes, macSpeed, macEfficiency, runTime, stopTime, warpStopTime, weftStopTIme, offLineTime, otherStopTime, warpStopNum, weftStopNum, otherStopNum, pickNum, uploadNum, statusChangeNum, shiftLength, shiftDate, shiftNow, updateTime, remark,stationno,middleno from mft_shift
+        select id, macCode, shiftType, shiftStartTime, shiftEndTime, pdtCodes, shaftCodes, macSpeed, macEfficiency, runTime, stopTime, warpStopTime, weftStopTIme, offLineTime, otherStopTime, warpStopNum, weftStopNum, otherStopNum, pickNum, uploadNum, statusChangeNum, shiftLength,startlength, shiftDate, shiftNow, updateTime, remark,stationno,middleno from mft_shift
     </sql>
 
     <select id="selectMftShiftList" parameterType="MftShift" resultMap="MftShiftResult">
@@ -67,6 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="middleno != null "> and middleno = #{middleno}</if>
             <if test="stationno != null "> and stationno = #{stationno}</if>
             <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and shiftStartTime between #{params.beginTime} and #{params.endTime}</if>
+            <if test="params.actTime != null"> and shiftEndTime &gt; #{params.actTime} and shiftNow !=2</if>
         </where>
         order by
         <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">
@@ -104,6 +106,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="uploadnum != null">uploadNum,</if>
             <if test="statuschangenum != null">statusChangeNum,</if>
             <if test="shiftlength != null">shiftLength,</if>
+            <if test="startlength != null">startlength,</if>
             <if test="shiftdate != null">shiftDate,</if>
             <if test="shiftnow != null">shiftNow,</if>
             <if test="updatetime != null">updateTime,</if>
@@ -133,6 +136,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="uploadnum != null">#{uploadnum},</if>
             <if test="statuschangenum != null">#{statuschangenum},</if>
             <if test="shiftlength != null">#{shiftlength},</if>
+            <if test="startlength != null">#{startlength},</if>
             <if test="shiftdate != null">#{shiftdate},</if>
             <if test="shiftnow != null">#{shiftnow},</if>
             <if test="updatetime != null">#{updatetime},</if>
@@ -166,6 +170,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="uploadnum != null">uploadNum = #{uploadnum},</if>
             <if test="statuschangenum != null">statusChangeNum = #{statuschangenum},</if>
             <if test="shiftlength != null">shiftLength = #{shiftlength},</if>
+            <if test="startlength != null">startlength = #{startlength},</if>
             <if test="shiftdate != null">shiftDate = #{shiftdate},</if>
             <if test="shiftnow != null">shiftNow = #{shiftnow},</if>
             <if test="updatetime != null">updateTime = #{updatetime},</if>

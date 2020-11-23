@@ -183,15 +183,13 @@ public class MftShiftServiceImpl implements IMftShiftService
         allMap.put("运行统计", runtimeMap);
         return allMap;
     }
-
     /**
-     * 判断是否要生成手动执行生成新的班次 如果已经生成了就不创建，
-     * 找到当前班次，shiftNow设为1以及更新时刻
-     *
+     * 根据班次与日期获取具体的时间
      * @param shiftType
+     * @param shiftDate
+     * @return
      */
-    @Override
-    public void checkNow(String shiftType, Long shiftNow,Date shiftDate) throws Exception {
+    public Map<String, Object> getStartEnd(String shiftType, Date shiftDate) throws Exception {
         List<SysDictData> mac_common_shift = dictDataMapper.selectDictDataByType("mac_common_shift");
         // 大于两班开始处理 计算对应的准确时刻下有没有数据
         // 获取对应班次的准确起止时间
@@ -226,18 +224,29 @@ public class MftShiftServiceImpl implements IMftShiftService
             String dictValue_end = mac_common_shift.get(0).getDictValue();
             shiftEndTime = DateUtils.parseDate(shiftDateStr2+" "+dictValue_end,DateUtils.YYYY_MM_DD_HH_MM_SS);
         }
-
-
-        // 生成班次
-        MftShift mftShift = new MftShift();
-        mftShift.setShifttype(shiftType);
-        mftShift.setShiftdate(DateUtils.parseDate(shiftDateStr,DateUtils.YYYY_MM_DD));
-        List<MftShift> mftShifts = mftShiftMapper.selectMftShiftList(mftShift);
         HashMap<String, Object> params = new HashMap<>();
         params.put("shiftEndTime", shiftEndTime);
         params.put("shiftStartTime", shiftStartTime);
         params.put("shiftDate", shiftDateStr);
         params.put("shiftType", shiftType);
+        return params;
+    }
+
+    /**
+     * 判断是否要生成手动执行生成新的班次 如果已经生成了就不创建，
+     * 找到当前班次，shiftNow设为1以及更新时刻
+     *
+     * @param shiftType
+     */
+    @Override
+    public void checkNow(String shiftType, Long shiftNow,Date shiftDate) throws Exception {
+
+        Map<String, Object> params = getStartEnd(shiftType, shiftDate);
+        // 生成班次
+        MftShift mftShift = new MftShift();
+        mftShift.setShifttype(shiftType);
+        mftShift.setShiftdate(DateUtils.parseDate((String) params.get(shiftDate),DateUtils.YYYY_MM_DD));
+        List<MftShift> mftShifts = mftShiftMapper.selectMftShiftList(mftShift);
         params.put("shiftNow", shiftNow);
         mftShift.setParams(params);
 

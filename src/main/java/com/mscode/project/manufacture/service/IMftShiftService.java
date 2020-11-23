@@ -2,6 +2,8 @@ package com.mscode.project.manufacture.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import com.mscode.project.manufacture.domain.MftShift;
 
 /**
@@ -68,5 +70,13 @@ public interface IMftShiftService
     Object listRecentDays(Integer days);
 
     void checkNow(String shiftType, Long shiftNow, Date shiftDate) throws Exception;
+
+    /**
+     * 根据班次与日期获取具体的时间
+     * @param shiftType
+     * @param shiftDate
+     * @return
+     */
+    Map<String, Object> getStartEnd(String shiftType, Date shiftDate) throws Exception ;
 
 }

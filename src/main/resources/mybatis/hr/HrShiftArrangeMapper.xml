@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.hr.mapper.HrShiftArrangeMapper">
+    
+    <resultMap type="HrShiftArrange" id="HrShiftArrangeResult">
+        <result property="id"    column="id"    />
+        <result property="shiftdate"    column="shiftDate"    />
+        <result property="shifttype"    column="shiftType"    />
+        <result property="arrangeid"    column="arrangeId"    />
+        <result property="arrangeno"    column="arrangeNo"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectHrShiftArrangeVo">
+        select id, shiftDate, shiftType, arrangeId, arrangeNo, status, create_time, update_time, create_by, update_by, remark from hr_shift_arrange
+    </sql>
+
+    <select id="selectHrShiftArrangeList" parameterType="HrShiftArrange" resultMap="HrShiftArrangeResult">
+        <include refid="selectHrShiftArrangeVo"/>
+        <where>  
+            <if test="shiftdate != null "> and shiftDate = #{shiftdate}</if>
+            <if test="shifttype != null  and shifttype != ''"> and shiftType = #{shifttype}</if>
+            <if test="arrangeid != null "> and arrangeId = #{arrangeid}</if>
+            <if test="arrangeno != null  and arrangeno != ''"> and arrangeNo = #{arrangeno}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectHrShiftArrangeById" parameterType="Long" resultMap="HrShiftArrangeResult">
+        <include refid="selectHrShiftArrangeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertHrShiftArrange" parameterType="HrShiftArrange">
+        insert into hr_shift_arrange
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="shiftdate != null">shiftDate,</if>
+            <if test="shifttype != null">shiftType,</if>
+            <if test="arrangeid != null">arrangeId,</if>
+            <if test="arrangeno != null">arrangeNo,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="shiftdate != null">#{shiftdate},</if>
+            <if test="shifttype != null">#{shifttype},</if>
+            <if test="arrangeid != null">#{arrangeid},</if>
+            <if test="arrangeno != null">#{arrangeno},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHrShiftArrange" parameterType="HrShiftArrange">
+        update hr_shift_arrange
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="shiftdate != null">shiftDate = #{shiftdate},</if>
+            <if test="shifttype != null">shiftType = #{shifttype},</if>
+            <if test="arrangeid != null">arrangeId = #{arrangeid},</if>
+            <if test="arrangeno != null">arrangeNo = #{arrangeno},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteHrShiftArrangeById" parameterType="Long">
+        delete from hr_shift_arrange where id = #{id}
+    </delete>
+
+    <delete id="deleteHrShiftArrangeByIds" parameterType="String">
+        delete from hr_shift_arrange where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mscode.project.hr.mapper.HrArrangeMapper">
+    
+    <resultMap type="HrArrange" id="HrArrangeResult">
+        <result property="id"    column="id"    />
+        <result property="arrangeno"    column="arrangeNo"    />
+        <result property="arrangestart"    column="arrangeStart"    />
+        <result property="arrangeend"    column="arrangeEnd"    />
+        <result property="macworkerids"    column="macWorkerIds"    />
+        <result property="arrangeclass"    column="arrangeClass"    />
+        <result property="status"    column="status"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <sql id="selectHrArrangeVo">
+        select id, arrangeNo, arrangeStart, arrangeEnd, macWorkerIds, arrangeClass, status, create_time, create_by, update_time, update_by, remark from hr_arrange
+    </sql>
+
+    <select id="selectHrArrangeList" parameterType="HrArrange" resultMap="HrArrangeResult">
+        <include refid="selectHrArrangeVo"/>
+        <where>  
+            <if test="arrangeno != null  and arrangeno != ''"> and arrangeNo = #{arrangeno}</if>
+            <if test="arrangestart != null "> and arrangeStart = #{arrangestart}</if>
+            <if test="arrangeend != null "> and arrangeEnd = #{arrangeend}</if>
+            <if test="macworkerids != null  and macworkerids != ''"> and macWorkerIds = #{macworkerids}</if>
+            <if test="arrangeclass != null  and arrangeclass != ''"> and arrangeClass = #{arrangeclass}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if><!--beginTime<arrangeEnd; endTime>arrangeStart;oldclass;-->
+            <if test="params.beginTime != null and params.endTime != null"> and arrangestart &lt; #{params.endTime} and arrangeEnd &gt; #{params.beginTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectHrArrangeById" parameterType="Long" resultMap="HrArrangeResult">
+        <include refid="selectHrArrangeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertHrArrange" parameterType="HrArrange">
+        insert into hr_arrange
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="arrangeno != null">arrangeNo,</if>
+            <if test="arrangestart != null">arrangeStart,</if>
+            <if test="arrangeend != null">arrangeEnd,</if>
+            <if test="macworkerids != null">macWorkerIds,</if>
+            <if test="arrangeclass != null">arrangeClass,</if>
+            <if test="status != null">status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="arrangeno != null">#{arrangeno},</if>
+            <if test="arrangestart != null">#{arrangestart},</if>
+            <if test="arrangeend != null">#{arrangeend},</if>
+            <if test="macworkerids != null">#{macworkerids},</if>
+            <if test="arrangeclass != null">#{arrangeclass},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateHrArrange" parameterType="HrArrange">
+        update hr_arrange
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="arrangeno != null">arrangeNo = #{arrangeno},</if>
+            <if test="arrangestart != null">arrangeStart = #{arrangestart},</if>
+            <if test="arrangeend != null">arrangeEnd = #{arrangeend},</if>
+            <if test="macworkerids != null">macWorkerIds = #{macworkerids},</if>
+            <if test="arrangeclass != null">arrangeClass = #{arrangeclass},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteHrArrangeById" parameterType="Long">
+        delete from hr_arrange where id = #{id}
+    </delete>
+
+    <delete id="deleteHrArrangeByIds" parameterType="String">
+        delete from hr_arrange where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>
