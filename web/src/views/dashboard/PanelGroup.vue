@@ -8,7 +8,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            班次平均车速
+            平均车速
           </div>
           <count-to :start-val="0" :end-val="avgSpeed" :duration="2000" class="card-panel-num" />
         </div>
@@ -21,7 +21,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            当天平均效率(%)
+            平均效率 <!--TODO改成当前的-->
           </div>
           <count-to :start-val="0" :end-val="avgEfficiency" :decimals="2" :duration="2000" class="card-panel-num" />
         </div>
@@ -34,7 +34,7 @@
         </div>
         <div class="card-panel-description">
           <div class="card-panel-text">
-            班次总产量(m)
+            总产量(m)
           </div>
           <count-to :start-val="0" :end-val="allWeavingLength" :duration="2000" class="card-panel-num" />
         </div>

@@ -8,7 +8,7 @@
     </el-row>
     <el-row v-for="i in allColumn"  :gutter="10"  type="flex" justify="space-between"  >
       <el-col v-for="j in allRow" :style="styleObject"  class="card-panel-col">
-        <machine-base :ref="i+'-'+j" :shaftList="shaftList"  ></machine-base>
+        <machine-base :ref="i+'-'+j" :shaftList="shaftList" :shiftTypes="shiftTypes"  ></machine-base>
       </el-col>
     </el-row>
   </el-main>
@@ -50,7 +50,7 @@
       return {
         macCode1:'',
         macCode2:'',
-
+        shiftTypes:[],
         styleObject:{
           width:'10%',
         }
@@ -59,6 +59,12 @@
     beforeCreate(){
     },
     created() {
+      this.getDicts("mac_common_shift").then(response => {
+        this.mac_common_shift=response.data;
+        this.mac_common_shift.forEach((statusList, index, array) =>{
+          this.shiftTypes.push(statusList.dictLabel);
+        });
+      });
     },
     computed: {
     },

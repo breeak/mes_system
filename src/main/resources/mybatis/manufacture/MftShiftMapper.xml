@@ -76,7 +76,52 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         shiftStartTime desc
     </select>
-    
+
+    <sql id="selectMftShiftVoGroup">
+        select id, macCode, shiftType, min(shiftStartTime) as shiftStartTime,max(shiftEndTime) as shiftEndTime, group_concat(pdtCodes) as pdtCodes, group_concat(shaftCodes) as shaftCodes, avg(macSpeed) as macSpeed, avg(macEfficiency) as macEfficiency, sum(runTime) as runTime,
+               sum(stopTime) as stopTime, sum(warpStopTime) as warpStopTime, sum(weftStopTIme) as weftStopTIme, sum(offLineTime) as offLineTime, sum(otherStopTime) as otherStopTime, sum(warpStopNum) as warpStopNum, sum(weftStopNum) as weftStopNum, sum(otherStopNum) as otherStopNum,
+               sum(pickNum) as pickNum, sum(uploadNum) as uploadNum, sum(statusChangeNum) as statusChangeNum, sum(shiftLength) as shiftLength, min(startlength) as startlength, shiftDate, sum(shiftNow) as shiftNow, updateTime, remark,stationno,middleno from mft_shift
+    </sql>
+
+    <select id="selectMftShiftListGroup" parameterType="MftShift" resultMap="MftShiftResult">
+        <include refid="selectMftShiftVoGroup"/>
+        <where>
+            <if test="maccode != null  and maccode != ''"> and macCode = #{maccode}</if>
+            <if test="shifttype != null  and shifttype != ''"> and shiftType = #{shifttype}</if>
+            <if test="shiftstarttime != null "> and shiftStartTime = #{shiftstarttime}</if>
+            <if test="shiftendtime != null "> and shiftEndTime = #{shiftendtime}</if>
+            <if test="pdtcodes != null  and pdtcodes != ''"> and pdtCodes like concat('%', #{pdtcodes}, '%')</if>
+            <if test="shaftcodes != null  and shaftcodes != ''"> and shaftCodes = #{shaftcodes}</if>
+            <if test="params.beginMacspeed != null and params.beginMacspeed != '' and params.endMacspeed != null and params.endMacspeed != ''"> and macSpeed between #{params.beginMacspeed} and #{params.endMacspeed}</if>
+            <if test="macefficiency != null "> and macEfficiency = #{macefficiency}</if>
+            <if test="runtime != null "> and runTime = #{runtime}</if>
+            <if test="stoptime != null "> and stopTime = #{stoptime}</if>
+            <if test="warpstoptime != null "> and warpStopTime = #{warpstoptime}</if>
+            <if test="weftstoptime != null "> and weftStopTIme = #{weftstoptime}</if>
+            <if test="offlinetime != null "> and offLineTime = #{offlinetime}</if>
+            <if test="otherstoptime != null "> and otherStopTime = #{otherstoptime}</if>
+            <if test="warpstopnum != null "> and warpStopNum = #{warpstopnum}</if>
+            <if test="weftstopnum != null "> and weftStopNum = #{weftstopnum}</if>
+            <if test="otherstopnum != null "> and otherStopNum = #{otherstopnum}</if>
+            <if test="picknum != null "> and pickNum = #{picknum}</if>
+            <if test="shiftlength != null "> and shiftLength = #{shiftlength}</if>
+            <if test="shiftdate != null "> and shiftDate = #{shiftdate}</if>
+            <if test="shiftnow != null "> and shiftNow = #{shiftnow}</if>
+            <if test="updatetime != null "> and updateTime = #{updatetime}</if>
+            <if test="middleno != null "> and middleno = #{middleno}</if>
+            <if test="stationno != null "> and stationno = #{stationno}</if>
+            <if test="params.beginTime != null and params.beginTime != '' and params.endTime != null and params.endTime != ''"> and shiftStartTime between #{params.beginTime} and #{params.endTime}</if>
+            <if test="params.actTime != null"> and shiftEndTime &gt; #{params.actTime} and shiftNow !=2</if>
+        </where>
+        group by maccode,shiftdate,shifttype
+        order by
+        <if test="params.sortProp != null and params.sortProp != '' and params.sortOrder != null and params.sortOrder != ''">
+            ${params.sortProp} ${params.sortOrder},
+        </if>
+        shiftStartTime desc
+    </select>
+
+
     <select id="selectMftShiftById" parameterType="Long" resultMap="MftShiftResult">
         <include refid="selectMftShiftVo"/>
         where id = #{id}

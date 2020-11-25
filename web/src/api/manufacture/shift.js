@@ -17,9 +17,9 @@ export function updateShiftAny(query) {
   })
 }
 // 查询班次最近几天的数据统计
-export function listShiftRecent(days) {
+export function listShiftRecent(days,maccode) {
   return request({
-    url: '/manufacture/shift/recent/'+days,
+    url: '/manufacture/shift/recent/'+days+'/'+maccode,
     method: 'get',
     params: days
   })

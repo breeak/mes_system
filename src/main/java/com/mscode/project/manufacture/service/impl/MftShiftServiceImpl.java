@@ -54,6 +54,10 @@ public class MftShiftServiceImpl implements IMftShiftService
     @Override
     public List<MftShift> selectMftShiftList(MftShift mftShift)
     {
+        Map<String, Object> params = mftShift.getParams();
+        if (params!=null && params.get("groupby")!=null){
+            return mftShiftMapper.selectMftShiftListGroup(mftShift);
+        }
         return mftShiftMapper.selectMftShiftList(mftShift);
     }
 
@@ -106,10 +110,13 @@ public class MftShiftServiceImpl implements IMftShiftService
     }
 
     @Override
-    public Object listRecentDays(Integer days){
+    public Object listRecentDays(Integer days, String maccode){
         // 获取对应的日期
         Date startDate = DateUtils.addDays(new Date(), days*-1);
         MftShift mftShift = new MftShift();
+        if (maccode!=null && !"null".equals(maccode)){
+            mftShift.setMaccode(maccode);
+        }
         mftShift.setBeginTime(DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD, startDate));
         List<MftShift> mftShifts = mftShiftMapper.selectMftShiftList(mftShift);
         if (mftShifts.size()==0){

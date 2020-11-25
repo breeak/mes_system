@@ -146,3 +146,32 @@ export function handleTree(data, id, parentId, children, rootId) {
 	});
 	return treeData != '' ? treeData : data;
 }
+
+/**
+ * 按照某个属性进行分组排布
+ * @param arr
+ * @param groupby
+ * @returns {Array}
+ */
+export function listGroupBy(arr, groupby) {
+  var map = {}, dest = [];
+  for(var i = 0; i < arr.length; i++){
+    var ai = arr[i];
+    if(!map[ai[groupby]]){
+      dest.push({
+        groupby: ai[groupby],
+        data: [ai]
+      });
+      map[ai[groupby]] = ai;
+    }else{
+      for(var j = 0; j < dest.length; j++){
+        var dj = dest[j];
+        if(dj.groupby == ai[groupby]){
+          dj.data.push(ai);
+          break;
+        }
+      }
+    }
+  }
+  return dest
+}

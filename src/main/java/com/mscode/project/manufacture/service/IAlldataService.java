@@ -63,4 +63,6 @@ public interface IAlldataService
     public int deleteAlldataById(Long id);
 
     MftShift getShift(String macCode, Date beginTime, Date endTime, MftShaft mftShaft);
+
+    List<Alldata> getShiftDetails(String middleno, Long stationno, Date shiftstarttime, Date shiftendtime, MftShaft mftShaft);
 }

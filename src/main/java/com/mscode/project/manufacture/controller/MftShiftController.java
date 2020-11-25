@@ -1,10 +1,15 @@
 package com.mscode.project.manufacture.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.mscode.common.utils.DateUtils;
+import com.mscode.project.manufacture.domain.Alldata;
+import com.mscode.project.manufacture.domain.MftShaft;
+import com.mscode.project.manufacture.service.IAlldataService;
+import com.mscode.project.manufacture.service.IMftShaftService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,9 +34,13 @@ public class MftShiftController extends BaseController
 {
     @Autowired
     private IMftShiftService mftShiftService;
-
+    @Autowired
+    private IAlldataService alldataService;
+    @Autowired
+    private IMftShaftService mftShaftService;
     /**
      * 查询班次效率列表
+     * 如果要查询合并 请使用groupby
      */
     @PreAuthorize("@ss.hasPermi('manufacture:shift:list')")
     @GetMapping("/list")
@@ -39,6 +48,39 @@ public class MftShiftController extends BaseController
     {
         startPage();
         mftShift.setParams(params);
+        if (params!=null){
+            // 这样是按照班次和织机类型查询的
+            if (params.get("shiftdate")!=null && params.get("maccode")!=null && params.get("groupby")!=null){
+                List<MftShift> list = mftShiftService.selectMftShiftList(mftShift);//只有一天的三个班 或者不到三个班；
+                List<Alldata> alldataList = new ArrayList<>();
+                params.put("groupby", null);//先不分组查 查出所有的shift;
+                mftShift.setParams(params);
+                List<MftShift> allList = mftShiftService.selectMftShiftList(mftShift);// 这里应该有按上轴时间分割的班次数据
+                for (MftShift shift : allList) {//只有一个品种了 为的是得到织轴长度 每一个的开始结束时间
+                    MftShaft mftShaft = new MftShaft();
+                    mftShaft.setShaftcode(shift.getShaftcodes());
+                    List<MftShaft> mftShafts = mftShaftService.selectMftShaftList(mftShaft);
+                    if (mftShafts.size()==1){
+                        mftShaft = mftShafts.get(0);
+                    }else{
+                        mftShaft.setPdtweftdensity(new BigDecimal(100));//TODO 给一个默认的纬密值 先默认是100
+                        mftShaft.setPdtcode("未上轴");
+                    }
+                    alldataList = alldataService.getShiftDetails(shift.getMiddleno(),shift.getStationno(), shift.getShiftstarttime(), shift.getShiftendtime(), mftShaft);
+                    for (MftShift newshift : list) {//只有一天的三个班 或者不到三个班；可能没有
+                        if (shift.getShifttype().equals(newshift.getShifttype())){//相等的放到一起
+                            if (newshift.getAlldataList()==null){
+                                newshift.setAlldataList(alldataList);
+                            }else{
+                                alldataList.addAll(newshift.getAlldataList() );
+                                newshift.setAlldataList(alldataList);
+                            }
+                        }
+                    }
+                }
+                return getDataTable(list);
+            }
+        }
         List<MftShift> list = mftShiftService.selectMftShiftList(mftShift);
         return getDataTable(list);
     }
@@ -71,10 +113,10 @@ public class MftShiftController extends BaseController
      * 查询班次最近days生产情况
      */
     @PreAuthorize("@ss.hasPermi('manufacture:shift:list')")
-    @GetMapping("/recent/{days}")
-    public AjaxResult shiftRecent(@PathVariable Integer days)
+    @GetMapping("/recent/{days}/{maccode}")
+    public AjaxResult shiftRecent(@PathVariable Integer days,@PathVariable String maccode)
     {
-        return AjaxResult.success(mftShiftService.listRecentDays(days));
+        return AjaxResult.success(mftShiftService.listRecentDays(days, maccode));
     }
 
     /**

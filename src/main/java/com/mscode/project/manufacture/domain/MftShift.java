@@ -2,6 +2,8 @@ package com.mscode.project.manufacture.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -105,12 +107,22 @@ public class MftShift extends BaseEntity
     @Excel(name = "班次产量")
     private BigDecimal shiftlength;
 
+    private List<Alldata> alldataList;
+
     /** 织轴起始产量 */
     @Excel(name = "织轴起始产量")
     private BigDecimal startlength;
 
     private String middleno;
     private Long stationno;
+
+    public List<Alldata> getAlldataList() {
+        return alldataList;
+    }
+
+    public void setAlldataList(List<Alldata> alldataList) {
+        this.alldataList = alldataList;
+    }
 
     public String getMiddleno() {
         return middleno;

@@ -62,4 +62,11 @@ public interface MftShiftMapper
     void createShift(MftShift mftShift);
 
     void updateShiftAny(MftShift mftShift);
+
+    /**
+     * 按照织机合并  换轴会有多个shift，进行合并
+     * @param mftShift
+     * @return
+     */
+    List<MftShift> selectMftShiftListGroup(MftShift mftShift);
 }

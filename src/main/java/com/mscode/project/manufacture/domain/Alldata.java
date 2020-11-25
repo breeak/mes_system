@@ -34,6 +34,7 @@ public class Alldata extends BaseEntity
     private Long starttime;
 
     /** $column.columnComment */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Date startdate;
 
@@ -42,6 +43,7 @@ public class Alldata extends BaseEntity
     private Long endtime;
 
     /** $column.columnComment */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Date enddate;
 
@@ -57,7 +59,30 @@ public class Alldata extends BaseEntity
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     private Long output;
 
-    public void setId(Long id) 
+    /** 班次产量 */
+    @Excel(name = "班次产量")
+    private BigDecimal length;
+    /** 品种编号 */
+    @Excel(name = "品种编号")
+    private String pdtcode;
+
+    public String getPdtcode() {
+        return pdtcode;
+    }
+
+    public void setPdtcode(String pdtcode) {
+        this.pdtcode = pdtcode;
+    }
+
+    public BigDecimal getLength() {
+        return length;
+    }
+
+    public void setLength(BigDecimal length) {
+        this.length = length;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }

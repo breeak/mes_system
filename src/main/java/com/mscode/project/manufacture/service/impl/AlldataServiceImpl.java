@@ -224,4 +224,38 @@ public class AlldataServiceImpl implements IAlldataService
         }
         return shift;
     }
+
+    @Override
+    public List<Alldata> getShiftDetails(String middleno, Long stationno, Date beginTime, Date endTime, MftShaft mftShaft) {
+        // 查找班次的所有数据
+        Alldata alldataQuery = new Alldata();
+        Map<String,Object> params = new HashMap<>();
+        params.put("beginTime", beginTime.getTime()/1000);
+        params.put("endTime", endTime.getTime()/1000);
+        alldataQuery.setMiddleno(middleno);
+        alldataQuery.setStationno(stationno);
+        alldataQuery.setParams(params);
+        List<Alldata> alldataList = alldataMapper.selectAlldataList(alldataQuery);
+        // 遍历得到所有的班次数据并且封装好
+        Double shiftLength=0.;
+        BigDecimal weftDensity = mftShaft.getPdtweftdensity();
+        for (Alldata alldata : alldataList) {
+            Long output = alldata.getOutput();
+            if (alldata.getStartdate().getTime() <= beginTime.getTime() && alldata.getEnddate().getTime() >= beginTime.getTime()) {
+                Long dusec = alldata.getEnddate().getTime() - beginTime.getTime();
+                output = output * new Double(dusec / (alldata.getEnddate().getTime() - alldata.getStartdate().getTime() + 0.000001)).longValue();
+                alldata.setDusec(dusec);
+                alldata.setOutput(output);
+            } else if (alldata.getStartdate().getTime() <= endTime.getTime() && alldata.getEnddate().getTime() >= endTime.getTime()) {
+                Long dusec = alldata.getEnddate().getTime() - endTime.getTime();
+                output = output * new Double(alldata.getDusec() / (alldata.getEnddate().getTime() - alldata.getStartdate().getTime() + 0.000001)).longValue();
+                alldata.setDusec(dusec);
+                alldata.setOutput(output);
+            }
+            shiftLength = output / (weftDensity.doubleValue() * 10);
+            alldata.setPdtcode(mftShaft.getPdtcode());
+            alldata.setLength(new BigDecimal(shiftLength).setScale(2, BigDecimal.ROUND_HALF_UP));
+        }
+        return alldataList;
+    }
 }

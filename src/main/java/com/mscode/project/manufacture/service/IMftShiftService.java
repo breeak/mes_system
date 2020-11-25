@@ -67,7 +67,7 @@ public interface IMftShiftService
      * @param days
      * @return
      */
-    Object listRecentDays(Integer days);
+    Object listRecentDays(Integer days,String maccode);
 
     void checkNow(String shiftType, Long shiftNow, Date shiftDate) throws Exception;
 

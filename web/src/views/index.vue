@@ -86,7 +86,8 @@ export default {
       barData:{},
       barType:"macspeed",
       showtype:"速度统计",
-      lineData: {}
+      lineData: {},
+      lastDay:new Date()
     }
   },
   watch: {
@@ -105,35 +106,22 @@ export default {
     //列出所有织机  定时执行轮旬进行 不断的查询织机状态
     this.updateStatus();
     //列出最近的生产情况
-    listShiftRecent(7).then(response=>{
+    listShiftRecent(7,null).then(response=>{
       if (response.msg=="操作成功"){
         this.lineData=response.data;
       }
     });
-    //列出所有当前班次
-    listShift({shiftnow:"1"}).then(response=>{
+    //计算前一天是哪  并列出那一天的所有班次 分组排序好
+    this.lastday = this.parseTime(new Date(new Date().getTime()-60*1000*60*24),'{y}-{m}-{d}');
+    listShift({"shiftdate":this.lastday}).then(response=>{
       if (response.rows.length>0){
-        var shiftInfo = this.calcShift(response.rows);
-        this.allWeavingLength =shiftInfo.allLength;
-        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
+        let lastShiftGroup = this.listGroupBy(response,"shifttype");
+        lastShiftGroup.forEach(arr=>{
+          let shiftInfo = this.calcShift(arr);
+          this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
+        });
       }
     });
-    // 列出前一班
-    listShift({shiftnow:"-1"}).then(response=>{
-      if (response.rows.length>0){
-        var shiftInfo = this.calcShift(response.rows);
-        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
-      }
-    });
-    // 列出再前一班
-    listShift({shiftnow:"-2"}).then(response=>{
-      if (response.rows.length>0){
-        var shiftInfo = this.calcShift(response.rows);
-        this.avgEfficiencyList.push(shiftInfo.avgEfficiency)
-      }
-    });
-
-
     //列出所有正在上轴的织轴
     listShaft({shaftstatus:"1"}).then(response=>{
       if (response.rows.length>0){

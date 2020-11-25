@@ -21,77 +21,143 @@
       </div>
     </div>
   <!-- 用户导入对话框 -->
-  <el-dialog  width="800px" :visible.sync="isShowInfo" title="生产详情" >
+  <el-dialog  width="1000px" :visible.sync="isShowInfo" :title="'生产详情：'+machine.maccode" >
       <!--TODO  查看织机情况-->
-    <el-form :model="machine" :inline="true"  label-width="100px" >
-      <el-form-item label="织机编号" >
-        <el-input v-model="machine.maccode" ></el-input>
-      </el-form-item>
-      <el-form-item label="织机类型" >
-        <el-input v-model="machine.mactype" ></el-input>
-      </el-form-item>
-      <el-form-item label="效率" >
-        <el-input v-model="machine.macefficiency" ></el-input>
-      </el-form-item>
-      <el-form-item label="车速" >
-        <el-input v-model="machine.macspeed" ></el-input>
-      </el-form-item>
-      <el-form-item label="状态" >
-        <el-input v-model="machine.macstatus" ></el-input>
-      </el-form-item>
-      <el-form-item label="品种编号" >
-        <el-input v-model="machine.pdtcode" ></el-input>
-      </el-form-item>
-      <el-form-item label="织轴编号" >
-        <el-input v-model="machine.shaftcode" ></el-input>
-      </el-form-item>
-      <el-form-item label="纬密根/10cm" >
-        <el-input v-model="machine.weftdensity" ></el-input>
-      </el-form-item>
-    </el-form>
-    <el-form :model="shaft" :inline="true"  label-width="100px" >
-      <el-form-item label="织轴总长" >
-        <el-input v-model="shaft.shaftlength" ></el-input>
-      </el-form-item>
-      <el-form-item label="剩余长度" >
-        <el-input v-model="shaft.shaftremainlength" ></el-input>
-      </el-form-item>
-      <el-form-item label="已织长度" >
-        <el-input v-model="shaft.clothlength" ></el-input>
-      </el-form-item>
-      <el-form-item label="上机时间" >
-        <el-input v-model="shaft.actstart" ></el-input>
-      </el-form-item>
-      <el-form-item label="预了时间" >
-        <el-input v-model="shaft.planend" ></el-input>
-      </el-form-item>
-      <el-form-item label="织造进度" >
-        <el-input v-model="spanwidth" ></el-input>
-      </el-form-item>
-    </el-form>
+    <div class="dashboard-editor-container">
+
+      <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+        <el-form :model="machine" :inline="true"  label-width="200px" >
+          <el-form-item label="品种编号/织轴编号/品种纬密" >
+            <el-input v-model="machine.pdtcode" size="mini" style="width: 150px" ></el-input>
+            <el-input v-model="machine.shaftcode" size="mini" style="width: 150px"  ></el-input>
+            <el-input v-model="machine.weftdensity" size="mini" style="width: 150px"  ></el-input>
+          </el-form-item>
+          <br>
+          <el-form-item label="现在产量/织轴总长/织造进度" >
+            <el-input v-model="machine.clothlength" size="mini" style="width: 150px" ></el-input>
+            <el-input v-model="machine.shaftlength" size="mini" style="width: 150px"></el-input>
+            <el-input v-model="spanwidth" size="mini" style="width: 150px"></el-input>
+          </el-form-item>
+          <el-form-item label="上机时间/预了时间/剩余小时" >
+            <el-input v-model="shaft.actstart" size="mini" style="width: 150px" ></el-input>
+            <el-input v-model="shaft.planend" size="mini" style="width: 150px"></el-input>
+            <el-input v-model="spanwidth" size="mini" style="width: 150px"></el-input> <!--TODO 计算剩余小时数-->
+          </el-form-item>
+          <el-form-item label="车速/效率/状态" >
+            <el-input v-model="machine.macspeed" size="mini" style="width: 150px" ></el-input>
+            <el-input v-model="machine.macefficiency" size="mini" style="width: 150px"></el-input>
+            <el-input v-model="macstate" size="mini" style="width: 150px"></el-input>
+          </el-form-item>
+        </el-form>
+      </el-row>
+      <panel-group @handleSetLineChartData="handleSetLineChartData" :avgSpeed="avgSpeed" :avgEfficiency="avgEfficiency" :allWeavingLength="allWeavingLength" :stopMacNum="stopMacNum" />
+      <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+        <div><b>{{showtype}}</b></div>
+        <line-chart :chart-data="lineData" :showtype="showtype"/>
+      </el-row>
+      <el-row style="background:#fff;padding:16px 16px 0;margin-bottom:32px;">
+
+        <el-col :xs="14" :sm="14" :lg="14">
+          <div style="margin-bottom: 20px">
+            <b>日期：{{shiftDate}}</b>&nbsp;&nbsp;&nbsp;&nbsp;
+            <el-button  size="mini" round @click="changeDate(shiftDate,-1)">前一天</el-button>
+            <el-button  size="mini" round @click="changeDate(shiftDate,+1)">后一天</el-button>
+          </div>
+          <profile-chart :chart-data="profileData"  :mac_common_status="mac_common_status" :shiftTypes="shiftTypes"/>
+
+        </el-col>
+        <el-col :xs="10" :sm="10" :lg="10">
+          <div><b>数据统计</b></div>
+          <div style="text-align: center"> <!--应该是查询班次数量类别的-->
+            <span v-for="item in shiftTypes"   class="card-panel-col" style="margin-left:10px">
+              <el-button  size="mini" :type="shiftType==item?'primary':''" round @click="changeShift(item)">{{item}}</el-button>
+            </span>
+          </div>
+          <el-form :model="mftshift" :inline="true"  label-width="150px" >
+            <el-form-item label="运行时长/停机时长" >
+              <el-input v-model="mftshift.runtime" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.stoptime" size="mini" style="width: 100px"  ></el-input>
+            </el-form-item>
+            <br>
+            <el-form-item label="经停时长/经停次数" >
+              <el-input v-model="mftshift.warpstoptime" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.warpstopnum" size="mini" style="width: 100px"></el-input>
+            </el-form-item>
+            <el-form-item label="纬停时长/纬停次数" >
+              <el-input v-model="mftshift.otherstoptime" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.weftstopnum" size="mini" style="width: 100px"></el-input>
+            </el-form-item>
+            <el-form-item label="其他停时长/次数" >
+              <el-input v-model="mftshift.otherstoptime" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.otherstopnum" size="mini" style="width: 100px"></el-input>
+            </el-form-item>
+            <el-form-item label="织造长度/打纬次数" >
+              <el-input v-model="mftshift.shiftlength" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.picknum" size="mini" style="width: 100px"></el-input>
+            </el-form-item>
+            <el-form-item label="平均车速/平均效率" >
+              <el-input v-model="mftshift.macspeed" size="mini" style="width: 100px" ></el-input>
+              <el-input v-model="mftshift.macefficiency" size="mini" style="width: 100px"></el-input>
+            </el-form-item>
+          </el-form>
+        </el-col>
+      </el-row>
+    </div>
+
   </el-dialog>
   </div>
 </template>
 
 <script>
-  import { listShift} from "@/api/manufacture/shift";
+import PanelGroup from '../../dashboard/PanelGroup'
+import LineChart from '../../dashboard/LineChart'
+import ProfileChart from '../../dashboard/ProfileChart'
+  // import RaddarChart from './dashboard/RaddarChart'
+  // import PieChart from './dashboard/PieChart'
+  // import BarChart from './dashboard/BarChart'
+
+import { listShift,listShiftRecent } from "@/api/manufacture/shift";
   import { listShaft} from "@/api/manufacture/shaft";
+
   export default {
     props:{
       shaftList:{
         type:Array,
-      }
+      },
+      shiftTypes:{
+        type:Array,
+      },
+    },
+    components: {
+      PanelGroup,
+      LineChart,
+      ProfileChart,
+      /*           RaddarChart,
+            PieChart,
+            BarChart,*/
     },
     data() {
       return {
         machine:Object,
         mftshift:{},
         shaft:{},
-        mac_common_status:null,
+        mac_common_status:[],
         isShowInfo:false,
         backgroundColor: "#",
         progress:0,
         spanwidth:0,
+        remainhour:0,
+        macstate:"未知",
+        //图表
+        lineData: {},
+        avgSpeed:0,
+        avgEfficiency:0,
+        allWeavingLength:0,
+        showtype:"速度统计",
+        stopMacNum:0, //TODO 这里要改成停台次数
+        shiftType:'早班',//显示详情的类别默认
+        profileData:[],
+        shiftDate:this.parseTime(new Date(),'{y}-{m}-{d}')
       }
     },
     computed:{
@@ -111,6 +177,7 @@
           this.mac_common_status.forEach((statusList, index, array) =>{
             if (statusList.dictValue==this.machine.macstatus){
               this.backgroundColor=statusList.remark
+              this.macstate = statusList.dictLabel;
             }
           })
         },
@@ -122,10 +189,19 @@
             this.shaft = shaft;
             this.progress = (shaft.shaftlength-shaft.shaftremainlength)*100/shaft.shaftlength
             this.spanwidth = this.progress + "%";
+            this.remainhour = ((shaft.planend.getTime()-shaft.actstart.getTime())/(1000*60*60)).toFixed(2);
           }
         })
       },
-
+      ProfileData:function(val,oldVal){
+        this.ProfileData.forEach(shift=>{
+          if (shift.shifttype==this.shiftType){
+            this.mftshift = shift;
+          }
+        });
+      },
+      machine: function (val,oldVal) {
+      }
     },
     updated(){
       this.shaftList.forEach((shaft, index, array) =>{
@@ -138,13 +214,72 @@
     },
     methods:{
       lookInfo(id){
+        // 有织机传过来了 查这个织机的当前班次情况，shiftnow=1应该只有一个；
+        var shiftDatester = this.parseTime(new Date(),'{y}-{m}-{d}')//查当天的情况
+        listShift({"shiftdate":shiftDatester,"maccode":this.machine.maccode,"groupby":true}).then(response=>{
+          if (response.rows.length>0){// 可能大于1的
+            //计算平均车速等
+            response.rows.forEach(shift=>{
+              if (shift.shiftnow==1){//今天应该必定有当前时刻
+                this.mftshift = shift;
+                this.avgSpeed = this.mftshift.macspeed;
+                this.avgEfficiency = this.mftshift.macefficiency;
+                this.stopMacNum=this.mftshift.warpstopnum+this.mftshift.weftstopnum+this.mftshift.otherstopnum;
+                this.allWeavingLength = this.mftshift.shiftlength;
+              }
+            });
+          }
+          //列出最近7天的情况
+          listShiftRecent(7,this.machine.maccode).then(response=>{
+            if (response.msg=="操作成功"){
+              this.lineData=response.data;
+            }
+            //列出指定时间的生产情况
+            listShift({"shiftdate":this.shiftDate,"maccode":this.machine.maccode,"groupby":true}).then(response=>{
+              this.ProfileData = response.rows;
+            });
+          });
+        });
         this.isShowInfo=true;
       },
-
+      //点击切换显示内容
+      handleSetLineChartData(type) {
+        this.showtype = type;
+      },
+      //点击切换班次显示内容
+      changeShift(type) {
+        this.shiftType = type;
+        this.ProfileData.forEach(shift=>{
+          if (shift.shifttype==this.shiftType){
+            this.mftshift = shift;
+          }
+        });
+      },
+      //点击切换日期
+      changeDate(datestr,type) {
+        var newday = this.parseTime(new Date(new Date(datestr).getTime()+60*1000*60*24*type),'{y}-{m}-{d}');
+        this.shiftDate = newday;
+        //列出指定时间的生产情况
+        listShift({"shiftdate":this.shiftDate,"maccode":this.machine.maccode,"groupby":true}).then(response=>{
+          this.ProfileData = response.rows;
+        });
+      },
     }
   }
 </script>
 <style lang="scss" scoped>
+  .dashboard-editor-container {
+    padding: 32px;
+    background-color: rgb(240, 242, 245);
+    position: relative;
+
+    .chart-wrapper {
+      background: #fff;
+      padding: 16px 16px 0;
+      margin-bottom: 32px;
+    }
+  }
+
   .card-panel {
     margin-bottom: 5px;
     height: 70px;
@@ -269,4 +404,10 @@
       }
     }
   }*/
+
+  @media (max-width:1024px) {
+    .chart-wrapper {
+      padding: 8px;
+    }
+  }
 </style>
