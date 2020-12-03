@@ -44,7 +44,7 @@ public class HrMacWorkerController extends BaseController
         hrMacWorker.setParams(params);
         List<HrMacWorker> list = hrMacWorkerService.selectHrMacWorkerList(hrMacWorker);
         List<HrWorker> workers = new ArrayList<>();
-        if (params!=null && params.get("groupby").equals("workerid")){
+        if (params!=null && params.get("groupby")!=null && params.get("groupby").equals("workerid")){
             for (HrMacWorker macWorker : list) {
                 HrWorker hrWorker = hrWorkerService.selectHrWorkerById(macWorker.getWorkerid());
                 workers.add(hrWorker);

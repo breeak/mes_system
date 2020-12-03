@@ -123,7 +123,7 @@
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['hr:worker:edit']"
-          >修改</el-button>
+          >修改</el-button> <!-- TODO 修改员工组别等的排班也应该删除或者修改-->
           <el-button
             size="mini"
             type="text"
@@ -263,7 +263,7 @@
                           placeholder="选择结束日期">
           </el-date-picker>
         </el-form-item>
-        <el-radio-group v-model="showclass" size="small">
+        <el-radio-group v-model="showclass" size="small">  <!--TODO 这些应该是从字典里查出来的-->
           <el-radio-button value="A" label="A">A组</el-radio-button>
           <el-radio-button value="B" label="B">B组</el-radio-button>
           <el-radio-button value="C" label="C">C组</el-radio-button>
@@ -280,7 +280,7 @@
 
       <el-row>
         <el-row :gutter="10"   type="flex" align="middle"  justify="space-between" class="card-panel-tittle" >
-          <div class="card-panel-info">点击选择区域 再次点击取消 红色表示待定 确定保存变绿</div>
+          <div class="card-panel-info">点击选择区域 再次点击取消</div>
         </el-row>
         <machine v-on:update="receiveData"  :machineList="machineList" :allRow="allRow" :allColumn="allColumn"
                  :macworkerMap="macworkerMap" :oldworker="form.workerid" :newworker="form.otherworkerid"/>

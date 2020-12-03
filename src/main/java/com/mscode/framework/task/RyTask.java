@@ -2,6 +2,11 @@ package com.mscode.framework.task;
 
 import com.mscode.common.constant.ScheduleConstants;
 import com.mscode.common.utils.DateUtils;
+import com.mscode.framework.config.MsCodeConfig;
+import com.mscode.project.hr.domain.HrArrange;
+import com.mscode.project.hr.domain.HrShiftArrange;
+import com.mscode.project.hr.service.IHrArrangeService;
+import com.mscode.project.hr.service.IHrShiftArrangeService;
 import com.mscode.project.manufacture.domain.MacMachine;
 import com.mscode.project.manufacture.domain.MftShift;
 import com.mscode.project.manufacture.service.IAlldataService;
@@ -16,7 +21,10 @@ import org.springframework.stereotype.Component;
 
 import com.mscode.common.utils.StringUtils;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -42,6 +50,12 @@ public class RyTask
     @Autowired
     private IAlldataService alldataService;
 
+    @Autowired
+    private IHrArrangeService hrArrangeService;
+    @Autowired
+    private IHrShiftArrangeService hrShiftArrangeService;
+
+
     public void ryMultipleParams(String s, Boolean b, Long l, Double d, Integer i)
     {
         System.out.println(StringUtils.format("执行多参方法： 字符串类型{}，布尔类型{}，长整型{}，浮点型{}，整形{}", s, b, l, d, i));
@@ -57,7 +71,22 @@ public class RyTask
         System.out.println("执行无参方法");
     }
 
+    /**
+     * 生成班次与人员排班的对应关系  具体就是 哪个班次 使用的是哪个排班
+     * 生成班次与人员排班一定也是那天 不要出现跨天
+     * 异常不处理  全部抛出 直接执行失败 看日志
+     */
+    public void updateShiftArrange() throws Exception
+    {
 
+    }
+
+
+    /**
+     * 生成班次的方法 ，每次到点会执行这个任务，建立正在执行的班次
+     * @param shiftType
+     * @throws Exception
+     */
     public void generateShift(String shiftType) throws Exception
     {
         //shiftNow, 只有 1当前 2未来 0已完成
@@ -132,8 +161,111 @@ public class RyTask
                 mftShiftService.insertMftShift(mftShift);
             }
         }
+        //排班的生成
+        Date date = new Date();     // 获取当前时刻
+        List<SysDictData> hr_worker_rule = dictTypeService.selectDictDataByType("hr_worker_rule");
+        ArrayList<String> orders = new ArrayList<>();
+        Long during = 5L; //先给个默认值
+        Date startDate = new Date();
+        String shiftStartType = "";
+        String shiftGroup = "";
+        Long current = 1L; //先给个默认值
+        Long offdays = 0L;
+        // 解析规则
+        for (SysDictData arrangeruleDict : hr_worker_rule) {
+            String dictLabel = arrangeruleDict.getDictLabel();
+            if (dictLabel.equals("轮班顺序")){
+                String value = arrangeruleDict.getDictValue();
+                String[] orderArray = value.split("，");//中文逗号
+                for (String s : orderArray) {
+                    orders.add(s);
+                }
+            }else if(dictLabel.equals("轮班周期")){
+                String value = arrangeruleDict.getDictValue();
+                during = Long.parseLong(value);
+            }else if(dictLabel.equals("轮班起始日期")){
+                String value = arrangeruleDict.getDictValue();
+                startDate = new SimpleDateFormat("yyyy-MM-dd").parse(value);
+            }else if (dictLabel.equals("轮班起始班次")){
+                shiftStartType = arrangeruleDict.getDictValue();
+            }else if (dictLabel.equals("轮班起始分组")){
+                shiftGroup = arrangeruleDict.getDictValue();
+            }else if (dictLabel.equals("轮班第几天")){
+                current = Long.parseLong(arrangeruleDict.getDictValue());
+            }else if (dictLabel.equals("共休息几天")){
+                offdays = Long.parseLong(arrangeruleDict.getDictValue());
+            }
+        }
+        //判断经过的天数  距离起始那天
+        Long datePoorDay = DateUtils.getDatePoorDay(date, startDate);
+        datePoorDay = datePoorDay - offdays;// 减去休息的天数 这些天数不参与排班；
+        Long aLoop = orders.size() * during; //一共几个组；多久换一次班；乘起来就是一个大循环的长度
+        Long yuDay = datePoorDay % aLoop;// 取余数就是当前在这个大循环的第几天
+        int startGroupIndex = -1;//判断开始的那个排第几 index
+        int startGroupRange = -1;//落在哪个范围里
+        for (int i = 0; i <= orders.size(); i++) {//要大一个
+            if ((during*i-current+1)<=yuDay && yuDay<(during*(i+1)-current+1)){// 判断在哪个区间里
+                startGroupRange = i;
+            }
+            if (i==orders.size()){
+                break;
+            }
+            String orderGroup = orders.get(i);
+            if (orderGroup.equals(shiftGroup)){// 判断开始的那个排第几
+                startGroupIndex = i;
+            }
+        }
+        int actStartIndex = (startGroupRange + startGroupIndex) % orders.size();//得到当前实际的一个班次
+        //获取实际的班次对应的数据
+        List<SysDictData> mac_common_shift = dictTypeService.selectDictDataByType("mac_common_shift");
+        int shiftIndex = -1; //获取起始的班次的排序
+        int currentIndex = -1; //获取当前班次的排序
+        for (int i = 0; i < mac_common_shift.size(); i++) {
+            SysDictData sysDictData = mac_common_shift.get(i);
+            if (sysDictData.getDictLabel().equals(shiftStartType)){
+                shiftIndex = i;
+            }
+            if (sysDictData.getDictLabel().equals(shiftType)){
+                currentIndex = i;
+            }
+        }
+        int actShiftIndex =(actStartIndex-(shiftIndex -currentIndex)+orders.size())%orders.size();
+        String actCurrentGroup = orders.get(actShiftIndex);
+
+        // 根据shiftType 与 actCurrentGroup 与 当前时刻 查找班次即可；然后保存一条记录即可
+        HrArrange hrArrange = new HrArrange();
+        hrArrange.setArrangeclass(actCurrentGroup);
+        Map<String, Object> params = new HashMap<>();
+        params.put("beginTime",date);
+        params.put("endTime",date);//两个date一样
+        hrArrange.setParams(params);
+        List<HrArrange> hrArranges = hrArrangeService.selectHrArrangeList(hrArrange);
+        if (hrArranges.size()==1){//应该只有一个排班的
+            HrArrange arrange = hrArranges.get(0);
+            HrShiftArrange hrShiftArrange = new HrShiftArrange();
+            hrShiftArrange.setArrangeid(arrange.getId());
+            hrShiftArrange.setArrangeno(arrange.getArrangeno());
+            hrShiftArrange.setShiftdate(DateUtils.parseDate(shiftDate,DateUtils.YYYY_MM_DD));
+            hrShiftArrange.setShifttype(shiftType);
+            hrShiftArrange.setCreateTime(new Date());
+            hrShiftArrange.setUpdateTime(new Date());
+            hrShiftArrange.setStatus("1");
+            hrShiftArrange.setCreateBy("admin");
+            hrShiftArrange.setUpdateBy("admin");
+            hrShiftArrange.setRemark("定时生成备注");
+            hrShiftArrangeService.insertHrShiftArrange(hrShiftArrange);
+        }else{
+            throw new Exception("此时间段未排班");
+        }
+        System.out.println(actCurrentGroup);
     }
 
+    /**
+     * 按照对应的班次顺序生成产生班次的定时任务；
+     * 每次修改mac_common_shift 都应该运行一次这个任务，这个任务的状态不应启用，但生成的定时任务应该手动启用
+     * @param dictType  排班日期与时间
+     * @throws Exception
+     */
     //班次表任务开启
     public void updateShift(String dictType) throws Exception{
         if (dictType==null || "".equals(dictType)){

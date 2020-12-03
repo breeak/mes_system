@@ -19,7 +19,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="排班id" prop="arrangeid">
+      <!--<el-form-item label="排班id" prop="arrangeid">
         <el-input
           v-model="queryParams.arrangeid"
           placeholder="请输入排班id"
@@ -36,10 +36,15 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
-      <el-form-item label="排班状态" prop="status">
+      </el-form-item>-->
+      <el-form-item label="排班状态" prop="workergroup">
         <el-select v-model="queryParams.status" placeholder="请选择排班状态" clearable size="small">
-          <el-option label="请选择字典生成" value="" />
+          <el-option
+            v-for="dict in hrCommonStatus"
+            :key="dict.dictValue"
+            :label="dict.dictLabel"
+            :value="dict.dictValue"
+          />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -48,7 +53,7 @@
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
+    <!--<el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
           type="primary"
@@ -88,11 +93,10 @@
         >导出</el-button>
       </el-col>
 	  <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+    </el-row>-->
 
     <el-table v-loading="loading" :data="shiftarrangeList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="id" align="center" prop="id" />
       <el-table-column label="班次日期" align="center" prop="shiftdate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.shiftdate, '{y}-{m}-{d}') }}</span>
@@ -101,11 +105,18 @@
       <el-table-column label="班次类别" align="center" prop="shifttype" :formatter="shifttypeFormat" />
       <el-table-column label="排班id" align="center" prop="arrangeid" />
       <el-table-column label="排班编号" align="center" prop="arrangeno" />
-      <el-table-column label="排班状态" align="center" prop="status" />
+      <el-table-column label="排班状态" align="center" prop="status" :formatter="hrCommonStatusFormat " />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-edit"
+            @click="handleInfo(scope.row)"
+            v-hasPermi="['hr:arrange:edit']"
+          >查看详情</el-button>
+          <!--<el-button
             size="mini"
             type="text"
             icon="el-icon-edit"
@@ -118,7 +129,7 @@
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['hr:shiftarrange:remove']"
-          >删除</el-button>
+          >删除</el-button>-->
         </template>
       </el-table-column>
     </el-table>
@@ -199,6 +210,8 @@ export default {
       open: false,
       // 班次类别字典
       shifttypeOptions: [],
+      // 排班状态字典
+      hrCommonStatus: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -221,6 +234,9 @@ export default {
     this.getDicts("mac_common_banci_type").then(response => {
       this.shifttypeOptions = response.data;
     });
+    this.getDicts("hr_common_status").then(response => {
+      this.hrCommonStatus = response.data;
+    });
   },
   methods: {
     /** 查询班次排班列表 */
@@ -236,6 +252,11 @@ export default {
     shifttypeFormat(row, column) {
       return this.selectDictLabel(this.shifttypeOptions, row.shifttype);
     },
+    // 状态字典翻译
+    hrCommonStatusFormat(row, column) {
+      return this.selectDictLabel(this.hrCommonStatus, row.status);
+    },
+
     // 取消按钮
     cancel() {
       this.open = false;
@@ -288,6 +309,16 @@ export default {
         this.form = response.data;
         this.open = true;
         this.title = "修改班次排班";
+      });
+    },
+    /** 查看排班详情 */
+    handleInfo(row) {
+      this.reset();
+      const id = row.id || this.ids
+      getArrange(id).then(response => {
+        this.form = response.data;
+        this.open = true;
+        this.title = "查看排班详情";
       });
     },
     /** 提交按钮 */
